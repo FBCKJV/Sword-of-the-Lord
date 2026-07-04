@@ -1,0 +1,33 @@
+import { H } from './dom.js';
+
+export const state = {
+  running: false, raf: null, last: 0,
+  levelIdx: 0, score: 0, lives: 3,
+  words: [], targetIdx: 0,
+  activeTile: null,
+  decoys: [],
+  particles: [],
+  spawnDelay: 0,
+  nextDecoyIn: 1.2,
+  fallSpeed: 90,
+  decoyInterval: 1.6,
+  flashTimer: 0, flashColor: null,
+  shake: 0,
+  currentEntry: null,
+  currentVerse: null,
+  devil: { y0: 320, bobPhase:0, hitFlash:0, shakeAmt:0, dying:0, scale:1, isBoss:false, key:'flameimp' },
+  sword: { swingTimer:0 },
+  slashFx: { active:false, t:0, dur:0.3, dir:1, y:H-160 },
+  bannerTimer: 0,
+  phase: 'idle',
+  hintEnabled: true,
+  soundEnabled: true,
+  paused: false,
+  combo: 0,
+  hasActiveRun: false,
+  levelPerfect: true,
+  best: 0,
+  tierDecks: {},
+  bossDeck: [],
+  levelPlan: []
+};
