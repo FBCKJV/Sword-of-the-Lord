@@ -47,10 +47,6 @@
 
     <div class="settings-row">
       <div class="hint-toggle" style="margin-bottom:0;">
-        <span>Verse hint:</span>
-        <button id="hintToggleBtn">On</button>
-      </div>
-      <div class="hint-toggle" style="margin-bottom:0;">
         <span>Sound:</span>
         <button id="soundToggleBtn">On</button>
       </div>
@@ -124,6 +120,17 @@
 
     <button class="playbtn" id="retryBtn">Take Up The Sword Again</button>
     <button class="badges-link" id="leaderboardBtnEnd">View Leaderboard</button>
+  </div>
+
+  <div class="overlay hidden victory-screen" id="victoryScreen">
+    <div class="eyebrow victory-eyebrow" id="victoryEyebrow">The Accuser Falls</div>
+    <h1 style="font-size:40px;">VICTORY</h1>
+    <div class="level-ref" id="victoryRef"></div>
+    <div class="level-verse" id="victoryVerse"></div>
+    <div class="score-line" style="margin-top:14px;">Score</div>
+    <div class="score-big" id="victoryScoreVal">0</div>
+    <div class="best" id="victoryRoundLine"></div>
+    <button class="playbtn" id="victoryContinueBtn">Onward</button>
   </div>
 
   <div class="update-banner" id="updateBanner">

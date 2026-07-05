@@ -1,5 +1,11 @@
 // Difficulty profiles. Every tunable that varies by audience lives here so
 // the rest of the game reads one object instead of scattering conditionals.
+//
+// Hint strip is purely difficulty-driven now (no separate on/off toggle):
+//   'fadeQuick' — shown at battle start, fades after hintFadeSeconds regardless
+//                 of progress (a short peek, not a crutch through the verse)
+//   'off'       — never shown in battle (still shown on the pre-battle study
+//                 screen for everyone, difficulty or not)
 export const DIFFICULTIES = {
   easy: {
     key: 'easy',
@@ -14,7 +20,9 @@ export const DIFFICULTIES = {
     demonAttackKinds: ['chaffBurst'],
     mercyChance: 0.5,       // chance per verse a dove can appear (when hurt)
     selahChance: 0.35,      // chance per verse a Selah tile appears
-    hintMode: 'always',     // hint strip never auto-fades
+    hintMode: 'fadeQuick',
+    hintFadeSeconds: 5,
+    camouflage: false,      // verse words keep their gold highlight vs. chaff
     scoreMult: 0.8
   },
   standard: {
@@ -30,7 +38,8 @@ export const DIFFICULTIES = {
     demonAttackKinds: ['chaffBurst', 'fog'],
     mercyChance: 0.3,
     selahChance: 0.22,
-    hintMode: 'fadeHalf',   // hint strip fades after the halfway word
+    hintMode: 'off',
+    camouflage: false,
     scoreMult: 1.0
   },
   valiant: {
@@ -46,7 +55,8 @@ export const DIFFICULTIES = {
     demonAttackKinds: ['chaffBurst', 'fog'],
     mercyChance: 0.15,
     selahChance: 0.12,
-    hintMode: 'battleHidden', // strip only on the study screen, never in battle
+    hintMode: 'off',
+    camouflage: true,       // no gold tell — verse words and chaff render identically
     scoreMult: 1.3
   }
 };

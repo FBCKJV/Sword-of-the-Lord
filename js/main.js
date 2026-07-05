@@ -11,7 +11,6 @@ import { loop } from './core/loop.js';
 import './core/input.js'; // attaches pointerdown listener
 
 const settings = loadSettings();
-state.hintEnabled = settings.hintEnabled;
 state.soundEnabled = settings.soundEnabled;
 state.musicEnabled = settings.musicEnabled;
 state.best = settings.best;

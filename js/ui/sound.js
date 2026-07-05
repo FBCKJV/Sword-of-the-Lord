@@ -35,6 +35,14 @@ export function playLevelComplete(){
 export function playGameOver(){
   tone({ freq:220, glideTo:80, dur:0.7, type:'sawtooth', gain:0.18 });
 }
+// Bigger and longer than the regular level-clear chime — Satan doesn't fall
+// every round, so the reward should feel like it.
+export function playBossVictory(){
+  [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f,i)=>
+    tone({ freq:f, dur:0.3, type:'triangle', gain:0.15, delay:i*0.1 }));
+  tone({ freq:1046.5, dur:1.1, type:'sine', gain:0.12, delay:0.55 });
+  tone({ freq:1318.5, dur:1.1, type:'sine', gain:0.1, delay:0.6 });
+}
 export function playBadgeUnlock(){
   [784, 987.77, 1174.66].forEach((f,i)=> tone({ freq:f, dur:0.3, type:'sine', gain:0.16, delay:i*0.07 }));
 }

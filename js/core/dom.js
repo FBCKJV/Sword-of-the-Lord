@@ -24,7 +24,6 @@ export const dom = {
   verseStrip: document.getElementById('verseStrip'),
   stripRef: document.getElementById('stripRef'),
   stripWords: document.getElementById('stripWords'),
-  hintToggleBtn: document.getElementById('hintToggleBtn'),
   soundToggleBtn: document.getElementById('soundToggleBtn'),
   musicToggleBtn: document.getElementById('musicToggleBtn'),
   difficultyRow: document.getElementById('difficultyRow'),
@@ -51,7 +50,14 @@ export const dom = {
   updateReloadBtn: document.getElementById('updateReloadBtn'),
   initialsForm: document.getElementById('initialsForm'),
   initialsSubmitBtn: document.getElementById('initialsSubmitBtn'),
-  initialsPrompt: document.getElementById('initialsPrompt')
+  initialsPrompt: document.getElementById('initialsPrompt'),
+  victoryScreen: document.getElementById('victoryScreen'),
+  victoryEyebrow: document.getElementById('victoryEyebrow'),
+  victoryRef: document.getElementById('victoryRef'),
+  victoryVerse: document.getElementById('victoryVerse'),
+  victoryScoreVal: document.getElementById('victoryScoreVal'),
+  victoryRoundLine: document.getElementById('victoryRoundLine'),
+  victoryContinueBtn: document.getElementById('victoryContinueBtn')
 };
 
 export function initialsInputs(){
