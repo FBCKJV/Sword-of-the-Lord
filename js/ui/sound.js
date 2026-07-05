@@ -1,12 +1,8 @@
 // Lightweight synthesized sound effects via Web Audio — no audio files to ship/cache.
 import { state } from '../core/state.js';
+import { getCtx, unlockAudio } from '../core/audio-context.js';
 
-let ctx = null;
-function getCtx(){
-  if(!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-  if(ctx.state === 'suspended') ctx.resume();
-  return ctx;
-}
+export { unlockAudio };
 
 function tone({ freq, dur=0.15, type='sine', gain=0.2, glideTo=null, delay=0 }){
   if(!state.soundEnabled) return;
@@ -21,10 +17,6 @@ function tone({ freq, dur=0.15, type='sine', gain=0.2, glideTo=null, delay=0 }){
   g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
   osc.connect(g); g.connect(ac.destination);
   osc.start(t0); osc.stop(t0 + dur + 0.02);
-}
-
-export function unlockAudio(){
-  try { getCtx(); } catch(e){ /* audio unavailable */ }
 }
 
 export function playSwing(){

@@ -133,7 +133,7 @@ button.playbtn:active{ transform:translateY(4px); box-shadow:0 2px 0 #6e1c11, 0 
 .loadscreen.hidden{ display:none; }
 
 /* ---------- Settings row (sound toggle) ---------- */
-.settings-row{ display:flex; align-items:center; gap:16px; margin-bottom:6px; }
+.settings-row{ display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:10px 16px; margin-bottom:6px; }
 
 /* ---------- Difficulty picker ---------- */
 .difficulty-row{ display:flex; gap:8px; margin-bottom:10px; }

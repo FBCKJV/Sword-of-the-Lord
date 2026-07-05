@@ -42,6 +42,7 @@ export const state = {
   bannerSub: null,
   phase: 'idle',
   hintEnabled: true,
+  musicEnabled: true,
   soundEnabled: true,
   stripVisible: false,  // whether the hint strip is actually showing right now
   difficulty: 'standard',

@@ -1,6 +1,7 @@
 const KEYS = {
   hint: 'sotl_hint_enabled',
   sound: 'sotl_sound_enabled',
+  music: 'sotl_music_enabled',
   best: 'sotl_best',
   difficulty: 'sotl_difficulty'
 };
@@ -19,6 +20,7 @@ export function loadSettings(){
   return {
     hintEnabled: readBool(KEYS.hint, true),
     soundEnabled: readBool(KEYS.sound, true),
+    musicEnabled: readBool(KEYS.music, true),
     best: (() => {
       try { return parseInt(localStorage.getItem(KEYS.best) || '0', 10) || 0; }
       catch(e){ return 0; }
@@ -32,6 +34,7 @@ export function loadSettings(){
 
 export function saveHintEnabled(val){ writeBool(KEYS.hint, val); }
 export function saveSoundEnabled(val){ writeBool(KEYS.sound, val); }
+export function saveMusicEnabled(val){ writeBool(KEYS.music, val); }
 export function saveBest(val){
   try { localStorage.setItem(KEYS.best, String(val)); } catch(e){}
 }

@@ -4,10 +4,11 @@ import { ensurePlan, drawVerse, drawBossVerse } from '../core/round-plan.js';
 import { IMAGES } from '../data/images.js';
 import { DEMONS } from '../data/demons.js';
 import { DIFFICULTIES, getDifficulty } from '../data/difficulty.js';
-import { saveBest, saveHintEnabled, saveSoundEnabled, saveDifficulty } from './settings.js';
+import { saveBest, saveHintEnabled, saveSoundEnabled, saveMusicEnabled, saveDifficulty } from './settings.js';
 import { recordLevelComplete, recordBestScore, queueBadgeToasts, renderBadgesGrid } from './badges.js';
 import { recordVersePlay, isMastered, masteredCount } from './mastery.js';
 import { playLevelComplete, playGameOver, unlockAudio } from './sound.js';
+import { playMenuTheme, playBattleTheme, playBossTheme, setMusicEnabled } from './music.js';
 import { submitScore, fetchTopScores, qualifiesForBoard } from '../firebase/leaderboard.js';
 
 // Set once by main.js (setLoopFn) instead of importing core/loop.js directly —
@@ -107,6 +108,7 @@ export function quitToMenu(){
   dom.continueBtn.classList.toggle('hidden', !state.hasActiveRun);
   dom.startScreen.classList.remove('hidden');
   renderBadgesGrid(dom);
+  playMenuTheme();
 }
 
 export function resumeRun(){
@@ -114,7 +116,16 @@ export function resumeRun(){
   dom.pauseBtn.classList.add('show');
   if(state.stripVisible) dom.verseStrip.classList.remove('hidden');
   state.paused = false;
+  syncMusicToEntry();
   startLoop();
+}
+
+// Battle vs. boss theme, matching whatever fight is actually in progress —
+// used on resume and at the top of every level so a boss encounter always
+// gets its own music even mid-run.
+function syncMusicToEntry(){
+  if(state.currentEntry && state.currentEntry.type === 'boss') playBossTheme();
+  else playBattleTheme();
 }
 
 export function startGame(){
@@ -143,6 +154,7 @@ export function beginLevel(){
   state.bannerText = null; state.bannerSub = null; state.bannerTimer = 0;
   ensurePlan(state.levelIdx);
   state.currentEntry = state.levelPlan[state.levelIdx];
+  syncMusicToEntry();
   const roundIdx = Math.floor(state.levelIdx / (DEMONS.length+1));
 
   if(state.currentEntry.type === 'boss'){
@@ -249,6 +261,7 @@ export async function endGame(){
   state.hasActiveRun = false;
   if(state.raf) cancelAnimationFrame(state.raf);
   playGameOver();
+  playMenuTheme();
   if(state.score > state.best){
     state.best = state.score;
     saveBest(state.best);
@@ -327,6 +340,19 @@ export function initSettingsUI(){
       dom.soundToggleBtn.classList.toggle('off', !state.soundEnabled);
       saveSoundEnabled(state.soundEnabled);
       if(state.soundEnabled) unlockAudio();
+    });
+  }
+
+  if(dom.musicToggleBtn){
+    dom.musicToggleBtn.textContent = state.musicEnabled ? 'On' : 'Off';
+    dom.musicToggleBtn.classList.toggle('off', !state.musicEnabled);
+    dom.musicToggleBtn.addEventListener('click', ()=>{
+      state.musicEnabled = !state.musicEnabled;
+      dom.musicToggleBtn.textContent = state.musicEnabled ? 'On' : 'Off';
+      dom.musicToggleBtn.classList.toggle('off', !state.musicEnabled);
+      saveMusicEnabled(state.musicEnabled);
+      if(state.musicEnabled) unlockAudio();
+      setMusicEnabled(state.musicEnabled);
     });
   }
 
