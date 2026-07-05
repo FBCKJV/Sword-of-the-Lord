@@ -77,14 +77,21 @@ export function updateStrip(){
   }).join(' ');
 }
 
-function levelParams(effTier){
+function levelParams(effTier, roundIdx){
   // Chaff eases in over the first two tiers rather than hitting full density
   // immediately — new players (and now that Standard has no hint at all)
   // need the early rounds to actually teach the pattern before it ramps up.
   const earlyEase = effTier <= 2 ? 1.35 : 1;
+  // The very first round (before Satan's been beaten even once) also gets
+  // its own across-the-board ease on top of that — tier 3-4 verses are
+  // long, and at full speed + full chaff that combination was overwhelming
+  // for a first fight. From round 2 on this backs off entirely and the
+  // tier-based ramp above is the only thing tuning difficulty, same as it
+  // scaling up further with every subsequent boss kill.
+  const roundEase = roundIdx === 0 ? { speed: 0.8, decoy: 1.3 } : { speed: 1, decoy: 1 };
   return {
-    fallSpeed: 80 + effTier*16,
-    decoyInterval: Math.max(0.5, 1.75 - effTier*0.17) * earlyEase,
+    fallSpeed: (80 + effTier*16) * roundEase.speed,
+    decoyInterval: Math.max(0.5, 1.75 - effTier*0.17) * earlyEase * roundEase.decoy,
     spawnGap: Math.max(0.22, 0.62 - effTier*0.05)
   };
 }
@@ -179,7 +186,7 @@ export function beginLevel(){
 
   state.words = state.currentVerse.text.split(/\s+/);
   state.targetIdx = 0;
-  const p = levelParams(state.currentEntry.type==='boss' ? 4 + roundIdx*0.5 : state.currentEntry.tier);
+  const p = levelParams(state.currentEntry.type==='boss' ? 4 + roundIdx*0.5 : state.currentEntry.tier, roundIdx);
   state.fallSpeed = p.fallSpeed * diff.speedMult;
   state.decoyInterval = p.decoyInterval;
   state.nextChainIn = 0.4;
