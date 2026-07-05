@@ -127,6 +127,20 @@ button.playbtn:active{ transform:translateY(4px); box-shadow:0 2px 0 #6e1c11, 0 
 
 .boss-tag{ color:var(--hell-bright) !important; }
 
+/* ---------- Boss victory screen ---------- */
+.victory-screen{
+  background:radial-gradient(ellipse at center, rgba(60,44,10,0.55) 0%, rgba(10,7,5,0.97) 78%);
+}
+.victory-eyebrow{ color:var(--gold-bright) !important; }
+.victory-screen h1{
+  text-shadow:0 0 40px rgba(244,217,118,0.6), 0 4px 0 rgba(0,0,0,0.5);
+  animation:victoryGlow 2.2s ease-in-out infinite;
+}
+@keyframes victoryGlow{
+  0%,100%{ text-shadow:0 0 40px rgba(244,217,118,0.5), 0 4px 0 rgba(0,0,0,0.5); }
+  50%{ text-shadow:0 0 60px rgba(244,217,118,0.85), 0 4px 0 rgba(0,0,0,0.5); }
+}
+
 /* ---------- Study screen (pre-battle memorization) ---------- */
 .study-screen{
   padding:0; justify-content:flex-start; background:var(--ink);

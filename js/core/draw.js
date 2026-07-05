@@ -1,6 +1,7 @@
 import { state } from './state.js';
 import { ctx, W, H } from './dom.js';
 import { SPRITES } from '../data/images.js';
+import { getDifficulty } from '../data/difficulty.js';
 
 export function drawBackground(){
   const g = ctx.createLinearGradient(0,0,0,H);
@@ -133,14 +134,18 @@ export function roundRect(x,y,w,h,r){
 }
 
 export function drawTile(tile, isDecoy){
+  // Valiant strips the gold "this one's real" tell entirely — verse words
+  // and chaff render identically, so the only way through is actually
+  // reading them in order, not pattern-matching a border color.
+  const camouflage = getDifficulty(state.difficulty).camouflage;
   ctx.save();
   ctx.translate(tile.x, tile.y);
   ctx.fillStyle = 'rgba(12,9,8,0.85)';
   roundRect(-tile.w/2,-tile.h/2,tile.w,tile.h,7); ctx.fill();
-  ctx.strokeStyle = isDecoy ? 'rgba(140,127,97,0.5)' : 'rgba(212,175,55,0.8)';
+  ctx.strokeStyle = camouflage ? 'rgba(216,212,200,0.55)' : (isDecoy ? 'rgba(140,127,97,0.5)' : 'rgba(212,175,55,0.8)');
   ctx.lineWidth = 2;
   roundRect(-tile.w/2,-tile.h/2,tile.w,tile.h,7); ctx.stroke();
-  ctx.fillStyle = isDecoy ? '#a89b7c' : '#ecdfc0';
+  ctx.fillStyle = camouflage ? '#d8d4c8' : (isDecoy ? '#a89b7c' : '#ecdfc0');
   ctx.font = '600 16px "EB Garamond", Georgia, serif';
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.fillText(tile.text, 0, 1);

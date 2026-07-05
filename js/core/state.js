@@ -41,7 +41,6 @@ export const state = {
   bannerText: null,     // override text for the mid-screen banner
   bannerSub: null,
   phase: 'idle',
-  hintEnabled: true,
   musicEnabled: true,
   soundEnabled: true,
   stripVisible: false,  // whether the hint strip is actually showing right now

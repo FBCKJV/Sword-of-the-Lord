@@ -4,10 +4,10 @@ import { ensurePlan, drawVerse, drawBossVerse } from '../core/round-plan.js';
 import { IMAGES } from '../data/images.js';
 import { DEMONS } from '../data/demons.js';
 import { DIFFICULTIES, getDifficulty } from '../data/difficulty.js';
-import { saveBest, saveHintEnabled, saveSoundEnabled, saveMusicEnabled, saveDifficulty } from './settings.js';
+import { saveBest, saveSoundEnabled, saveMusicEnabled, saveDifficulty } from './settings.js';
 import { recordLevelComplete, recordBestScore, queueBadgeToasts, renderBadgesGrid } from './badges.js';
 import { recordVersePlay, isMastered, masteredCount } from './mastery.js';
-import { playLevelComplete, playGameOver, unlockAudio } from './sound.js';
+import { playLevelComplete, playGameOver, playBossVictory, unlockAudio } from './sound.js';
 import { playMenuTheme, playBattleTheme, playBossTheme, setMusicEnabled } from './music.js';
 import { submitScore, fetchTopScores, qualifiesForBoard } from '../firebase/leaderboard.js';
 
@@ -39,20 +39,21 @@ export function renderShields(){
 }
 
 // ---------- Hint strip visibility ----------
-// The strip's presence is the difference between reading and remembering.
-// Difficulty decides how long you get to read; scoring rewards remembering.
-function stripModeForBattle(){
-  if(!state.hintEnabled) return 'off';
-  return getDifficulty(state.difficulty).hintMode;
-}
+// The strip's presence is purely a function of difficulty now (no separate
+// on/off toggle) — Easy gets a short timed peek, Standard and Valiant get
+// none at all in battle. The pre-battle study screen still shows the full
+// verse to everyone regardless.
+let hintFadeTimer = null;
 
 function showStripForBattle(){
-  const mode = stripModeForBattle();
+  const diff = getDifficulty(state.difficulty);
+  clearTimeout(hintFadeTimer);
   dom.verseStrip.classList.remove('fading');
-  if(mode === 'always' || mode === 'fadeHalf'){
+  if(diff.hintMode === 'fadeQuick'){
     dom.verseStrip.classList.remove('hidden');
     state.stripVisible = true;
     state.stripEverVisible = true;
+    hintFadeTimer = setTimeout(fadeStripOut, (diff.hintFadeSeconds || 5) * 1000);
   } else {
     dom.verseStrip.classList.add('hidden');
     state.stripVisible = false;
@@ -74,17 +75,16 @@ export function updateStrip(){
     else cls += 'upcoming';
     return `<span class="${cls}">${w}</span>`;
   }).join(' ');
-
-  if(stripModeForBattle() === 'fadeHalf' &&
-     state.targetIdx >= Math.ceil(state.words.length/2)){
-    fadeStripOut();
-  }
 }
 
 function levelParams(effTier){
+  // Chaff eases in over the first two tiers rather than hitting full density
+  // immediately — new players (and now that Standard has no hint at all)
+  // need the early rounds to actually teach the pattern before it ramps up.
+  const earlyEase = effTier <= 2 ? 1.35 : 1;
   return {
     fallSpeed: 80 + effTier*16,
-    decoyInterval: Math.max(0.5, 1.75 - effTier*0.17),
+    decoyInterval: Math.max(0.5, 1.75 - effTier*0.17) * earlyEase,
     spawnGap: Math.max(0.22, 0.62 - effTier*0.05)
   };
 }
@@ -151,6 +151,7 @@ export function beginLevel(){
   state.castTelegraph = 0; state.pendingCast = null;
   state.levelPerfect = true;
   state.stripEverVisible = false;
+  clearTimeout(hintFadeTimer);
   state.bannerText = null; state.bannerSub = null; state.bannerTimer = 0;
   ensurePlan(state.levelIdx);
   state.currentEntry = state.levelPlan[state.levelIdx];
@@ -280,8 +281,8 @@ export function levelComplete(){
   state.devil.dying = 1;
   state.bannerText = null; state.bannerSub = null; // default: IT IS WRITTEN
   state.bannerTimer = 1.6;
-  playLevelComplete();
   const isBoss = state.currentEntry.type === 'boss';
+  if(isBoss) playBossVictory(); else playLevelComplete();
   const diff = getDifficulty(state.difficulty);
   state.score += Math.round((isBoss ? 150 : 50) * diff.scoreMult);
   dom.scoreVal.textContent = Math.floor(state.score);
@@ -301,9 +302,29 @@ export function levelComplete(){
     renderShields();
   }
 
-  setTimeout(()=>{ state.levelIdx++; beginLevel(); }, 1700);
+  // Satan doesn't fall every round — that earns a real stop for a
+  // celebration instead of auto-marching into the next round like an
+  // ordinary demon kill does.
+  if(isBoss) setTimeout(showVictoryScreen, 1700);
+  else setTimeout(()=>{ state.levelIdx++; beginLevel(); }, 1700);
   startLoop();
 }
+
+function showVictoryScreen(){
+  const roundIdx = Math.floor(state.levelIdx / (DEMONS.length+1));
+  dom.victoryRef.textContent = state.currentVerse.ref;
+  dom.victoryVerse.textContent = '"' + state.currentVerse.text + '"';
+  dom.victoryScoreVal.textContent = Math.floor(state.score);
+  dom.victoryRoundLine.textContent = 'Round ' + (roundIdx + 1) + ' overcome';
+  dom.victoryScreen.classList.remove('hidden');
+}
+
+function continueAfterVictory(){
+  dom.victoryScreen.classList.add('hidden');
+  state.levelIdx++;
+  beginLevel();
+}
+dom.victoryContinueBtn.addEventListener('click', continueAfterVictory);
 
 export async function endGame(){
   state.running = false; state.phase = 'gameover';
@@ -394,15 +415,6 @@ function renderDifficultyUI(){
 }
 
 export function initSettingsUI(){
-  dom.hintToggleBtn.textContent = state.hintEnabled ? 'On' : 'Off';
-  dom.hintToggleBtn.classList.toggle('off', !state.hintEnabled);
-  dom.hintToggleBtn.addEventListener('click', ()=>{
-    state.hintEnabled = !state.hintEnabled;
-    dom.hintToggleBtn.textContent = state.hintEnabled ? 'On' : 'Off';
-    dom.hintToggleBtn.classList.toggle('off', !state.hintEnabled);
-    saveHintEnabled(state.hintEnabled);
-  });
-
   if(dom.soundToggleBtn){
     dom.soundToggleBtn.textContent = state.soundEnabled ? 'On' : 'Off';
     dom.soundToggleBtn.classList.toggle('off', !state.soundEnabled);
