@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SWORD OF THE LORD</title>
+<meta name="theme-color" content="#0c0908">
+<meta name="description" content="A KJV Bible sword-drill game — strike the falling words of scripture in order before the devil's chaff leads your blade astray.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="assets/icons/favicon.ico">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=EB+Garamond:ital,wght@0,500;0,700;1,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game" width="480" height="800"></canvas>
+
+  <div class="loadscreen" id="loadScreen">
+    <div class="eyebrow">Preparing</div>
+    <h1 style="font-size:28px;">Sharpening the Blade…</h1>
+  </div>
+
+  <div class="hud">
+    <div>
+      <div class="label">Score</div>
+      <div class="value" id="scoreVal">0</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="label">Shield of Faith</div>
+      <div class="shields" id="shields"></div>
+    </div>
+  </div>
+
+  <div class="versestrip hidden" id="verseStrip">
+    <span class="ref" id="stripRef"></span>
+    <span id="stripWords"></span>
+  </div>
+
+  <div class="badge-toast" id="badgeToast"></div>
+
+  <div class="overlay hidden" id="startScreen">
+    <div class="eyebrow">A Sword Drill</div>
+    <h1>SWORD OF THE LORD</h1>
+    <div class="sub">"And they cried, <b>The sword of the LORD, and of Gideon.</b>" (Judges 7:20) Study each verse, then strike its words in order before the devil's chaff leads your blade astray.</div>
+
+    <div class="settings-row">
+      <div class="hint-toggle" style="margin-bottom:0;">
+        <span>Verse hint:</span>
+        <button id="hintToggleBtn">On</button>
+      </div>
+      <div class="hint-toggle" style="margin-bottom:0;">
+        <span>Sound:</span>
+        <button id="soundToggleBtn">On</button>
+      </div>
+    </div>
+
+    <div class="badges-grid" id="badgesGrid"></div>
+
+    <button class="playbtn hidden" id="continueBtn" style="margin-bottom:12px;">Continue</button>
+    <button class="playbtn" id="startBtn">Draw the Sword</button>
+    <div class="controls-hint">tap the correct word as it falls · avoid the grey chaff</div>
+    <button class="badges-link" id="leaderboardBtn">View Leaderboard</button>
+  </div>
+
+  <div class="pauseBtn" id="pauseBtn"><span><i></i><i></i></span></div>
+
+  <div class="overlay hidden" id="pauseScreen">
+    <div class="pauseCard">
+      <div class="eyebrow">Paused</div>
+      <h1 style="font-size:32px;">Stand Fast</h1>
+      <button class="playbtn" id="resumeBtn" style="margin-bottom:14px;">Resume</button>
+      <div><button class="playbtn" id="quitBtn" style="background:transparent; border:1px solid rgba(212,175,55,0.4); box-shadow:none; color:var(--parchment-dim);">Quit to Menu</button></div>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="levelScreen">
+    <div class="eyebrow" id="levelEyebrow">Level 1</div>
+    <div class="demon-portrait" id="demonPortraitWrap"><img id="demonPortrait" src="" alt=""></div>
+    <div class="demon-name" id="demonName"></div>
+    <div class="level-ref" id="levelRef"></div>
+    <div class="level-verse" id="levelVerse"></div>
+    <div class="level-count" id="levelCount"></div>
+    <div class="countdown" id="countdownVal">3</div>
+  </div>
+
+  <div class="overlay hidden" id="endScreen">
+    <div class="eyebrow" id="endEyebrow">Shield Broken</div>
+    <div class="score-line">Fell at</div>
+    <div class="level-ref" id="endRef" style="margin-bottom:16px;"></div>
+    <div class="score-big" id="finalScore">0</div>
+    <div class="best" id="bestLine">Best score: 0</div>
+
+    <div id="initialsPrompt" class="hidden">
+      <div class="level-count">New high score! Enter your initials:</div>
+      <div class="initials-form" id="initialsForm">
+        <input maxlength="1" inputmode="text" autocapitalize="characters">
+        <input maxlength="1" inputmode="text" autocapitalize="characters">
+        <input maxlength="1" inputmode="text" autocapitalize="characters">
+      </div>
+      <button class="playbtn" id="initialsSubmitBtn" style="margin-bottom:14px;">Submit Score</button>
+    </div>
+
+    <button class="playbtn" id="retryBtn">Take Up The Sword Again</button>
+    <button class="badges-link" id="leaderboardBtnEnd">View Leaderboard</button>
+  </div>
+
+  <div class="update-banner" id="updateBanner">
+    <span>A new version is ready.</span>
+    <button id="updateReloadBtn">Reload</button>
+  </div>
+
+  <div class="overlay hidden" id="leaderboardScreen">
+    <div class="eyebrow">Arcade Board</div>
+    <h1 style="font-size:32px;">Top Swordsmen</h1>
+    <ol class="leaderboard-list" id="leaderboardList"></ol>
+    <button class="playbtn" id="leaderboardBackBtn">Back</button>
+  </div>
+</div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
