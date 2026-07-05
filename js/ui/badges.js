@@ -27,11 +27,17 @@ export const BADGES = [
     check: s => s.bossesDefeated >= 3 },
   { id:'steadfast', name:'Steadfast', icon:'steadfast.svg',
     desc:'Complete ten verses total.',
-    check: s => s.levelsCompleted >= 10 }
+    check: s => s.levelsCompleted >= 10 },
+  { id:'scribe', name:'Scribe', icon:'scribe.svg',
+    desc:'Master three verses — perfect, with no hint.',
+    check: s => s.versesMastered >= 3 },
+  { id:'hidden-word', name:'Hidden Word', icon:'hidden-word.svg',
+    desc:'"Thy word have I hid in mine heart" — master ten verses.',
+    check: s => s.versesMastered >= 10 }
 ];
 
 function defaultStats(){
-  return { correctHits:0, levelsCompleted:0, bossesDefeated:0, perfectVerses:0, noHintCompletions:0, bestScore:0 };
+  return { correctHits:0, levelsCompleted:0, bossesDefeated:0, perfectVerses:0, noHintCompletions:0, bestScore:0, versesMastered:0 };
 }
 
 export function loadStats(){
@@ -76,11 +82,12 @@ export function recordCorrectHit(){
   return evaluate();
 }
 
-export function recordLevelComplete({ isBoss, perfect, hintOff }){
+export function recordLevelComplete({ isBoss, perfect, hintOff, versesMastered }){
   stats.levelsCompleted++;
   if(isBoss) stats.bossesDefeated++;
   if(perfect) stats.perfectVerses++;
   if(hintOff) stats.noHintCompletions++;
+  if(typeof versesMastered === 'number') stats.versesMastered = versesMastered;
   saveStats(stats);
   return evaluate();
 }

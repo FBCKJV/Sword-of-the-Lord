@@ -1,7 +1,8 @@
 const KEYS = {
   hint: 'sotl_hint_enabled',
   sound: 'sotl_sound_enabled',
-  best: 'sotl_best'
+  best: 'sotl_best',
+  difficulty: 'sotl_difficulty'
 };
 
 function readBool(key, fallback){
@@ -21,6 +22,10 @@ export function loadSettings(){
     best: (() => {
       try { return parseInt(localStorage.getItem(KEYS.best) || '0', 10) || 0; }
       catch(e){ return 0; }
+    })(),
+    difficulty: (() => {
+      try { return localStorage.getItem(KEYS.difficulty) || 'standard'; }
+      catch(e){ return 'standard'; }
     })()
   };
 }
@@ -29,4 +34,7 @@ export function saveHintEnabled(val){ writeBool(KEYS.hint, val); }
 export function saveSoundEnabled(val){ writeBool(KEYS.sound, val); }
 export function saveBest(val){
   try { localStorage.setItem(KEYS.best, String(val)); } catch(e){}
+}
+export function saveDifficulty(key){
+  try { localStorage.setItem(KEYS.difficulty, key); } catch(e){}
 }

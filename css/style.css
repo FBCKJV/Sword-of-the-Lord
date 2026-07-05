@@ -44,6 +44,15 @@ canvas{
   transition: opacity 0.2s, transform 0.2s;
 }
 .shield.lost{ opacity:0.15; transform:scale(0.75); background:#3a3a3a; }
+.shield.grace{
+  background:linear-gradient(160deg, #f4d976, #d4af37);
+  box-shadow:0 0 8px rgba(244,217,118,0.8);
+  animation:gracePulse 1.6s ease-in-out infinite;
+}
+@keyframes gracePulse{
+  0%,100%{ filter:drop-shadow(0 0 2px rgba(244,217,118,0.6)); }
+  50%{ filter:drop-shadow(0 0 7px rgba(244,217,118,1)); }
+}
 
 .versestrip{
   position:absolute; top:11%; left:50%; transform:translateX(-50%);
@@ -58,6 +67,8 @@ canvas{
 .versestrip .w.now{ color:var(--gold-bright); font-weight:700; text-shadow:0 0 10px rgba(244,217,118,0.6); }
 .versestrip .w.upcoming{ color:rgba(140,127,97,0.45); }
 .versestrip .ref{ display:block; font-family:'Cinzel',serif; font-size:10px; letter-spacing:2px; color:var(--gold); margin-bottom:4px; text-transform:uppercase; }
+.versestrip{ transition:opacity 1.1s ease; }
+.versestrip.fading{ opacity:0; }
 
 .overlay{
   position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -123,6 +134,27 @@ button.playbtn:active{ transform:translateY(4px); box-shadow:0 2px 0 #6e1c11, 0 
 
 /* ---------- Settings row (sound toggle) ---------- */
 .settings-row{ display:flex; align-items:center; gap:16px; margin-bottom:6px; }
+
+/* ---------- Difficulty picker ---------- */
+.difficulty-row{ display:flex; gap:8px; margin-bottom:10px; }
+.diff-btn{
+  display:flex; flex-direction:column; align-items:center; gap:1px;
+  background:rgba(140,127,97,0.08); border:1px solid rgba(140,127,97,0.35);
+  border-radius:6px; padding:7px 13px; cursor:pointer; transition:all 0.15s;
+}
+.diff-btn .diff-label{
+  font-family:'Cinzel',serif; font-size:11px; letter-spacing:2px;
+  text-transform:uppercase; color:var(--parchment-dim);
+}
+.diff-btn .diff-tag{ font-family:'EB Garamond', Georgia, serif; font-size:10px; font-style:italic; color:rgba(140,127,97,0.8); }
+.diff-btn.active{
+  background:rgba(212,175,55,0.14); border-color:var(--gold);
+  box-shadow:0 0 12px rgba(212,175,55,0.25);
+}
+.diff-btn.active .diff-label{ color:var(--gold-bright); }
+.diff-btn.active .diff-tag{ color:var(--parchment-dim); }
+
+.mastered-tag{ color:var(--gold-bright); font-style:normal; }
 
 /* ---------- Badges ---------- */
 .badge-toast{
