@@ -4,10 +4,11 @@ import { ensurePlan, drawVerse, drawBossVerse } from '../core/round-plan.js';
 import { IMAGES } from '../data/images.js';
 import { DEMONS } from '../data/demons.js';
 import { DIFFICULTIES, getDifficulty } from '../data/difficulty.js';
-import { saveBest, saveHintEnabled, saveSoundEnabled, saveDifficulty } from './settings.js';
+import { saveBest, saveHintEnabled, saveSoundEnabled, saveMusicEnabled, saveDifficulty } from './settings.js';
 import { recordLevelComplete, recordBestScore, queueBadgeToasts, renderBadgesGrid } from './badges.js';
 import { recordVersePlay, isMastered, masteredCount } from './mastery.js';
 import { playLevelComplete, playGameOver, unlockAudio } from './sound.js';
+import { playMenuTheme, playBattleTheme, playBossTheme, setMusicEnabled } from './music.js';
 import { submitScore, fetchTopScores, qualifiesForBoard } from '../firebase/leaderboard.js';
 
 // Set once by main.js (setLoopFn) instead of importing core/loop.js directly —
@@ -107,6 +108,7 @@ export function quitToMenu(){
   dom.continueBtn.classList.toggle('hidden', !state.hasActiveRun);
   dom.startScreen.classList.remove('hidden');
   renderBadgesGrid(dom);
+  playMenuTheme();
 }
 
 export function resumeRun(){
@@ -114,7 +116,16 @@ export function resumeRun(){
   dom.pauseBtn.classList.add('show');
   if(state.stripVisible) dom.verseStrip.classList.remove('hidden');
   state.paused = false;
+  syncMusicToEntry();
   startLoop();
+}
+
+// Battle vs. boss theme, matching whatever fight is actually in progress —
+// used on resume and at the top of every level so a boss encounter always
+// gets its own music even mid-run.
+function syncMusicToEntry(){
+  if(state.currentEntry && state.currentEntry.type === 'boss') playBossTheme();
+  else playBattleTheme();
 }
 
 export function startGame(){
@@ -132,7 +143,7 @@ export function startGame(){
 
 export function beginLevel(){
   const diff = getDifficulty(state.difficulty);
-  state.phase = 'countdown';
+  state.phase = 'study';
   state.particles = []; state.decoys = []; state.verseTiles = [];
   state.powerups = []; state.popups = [];
   state.fog = null; state.bossPhase2 = false;
@@ -191,8 +202,58 @@ export function beginLevel(){
   dom.levelCount.innerHTML = state.words.length + ' words · find them in order'
     + (mastered ? ' · <span class="mastered-tag">✦ mastered</span>' : '');
   dom.verseStrip.classList.add('hidden');
-  dom.levelScreen.classList.remove('hidden');
   dom.endScreen.classList.add('hidden');
+
+  beginStudy();
+}
+
+// ---------- Study phase: a long, skippable memorization window before the
+// quick 3-2-1 reveal. Menu music keeps playing here regardless of what's
+// coming — battle/boss music only kicks in once the countdown starts, so
+// the calm-before-the-storm beat actually lands.
+let studyIv = null;
+
+function studyDurationFor(wordCount){
+  return Math.max(10, Math.min(18, 8 + Math.round(wordCount * 0.7)));
+}
+
+function beginStudy(){
+  if(studyIv){ clearInterval(studyIv); studyIv = null; }
+  state.phase = 'study';
+  playMenuTheme();
+
+  dom.studyRef.textContent = state.currentVerse.ref;
+  dom.studyVerse.textContent = '"' + state.currentVerse.text + '"';
+  dom.studyFacing.textContent = state.currentEntry.type === 'boss'
+    ? 'Satan approaches'
+    : 'Facing: ' + state.currentEntry.demonName;
+  dom.studyScreen.classList.remove('hidden');
+
+  let remaining = studyDurationFor(state.words.length);
+  dom.studyTimerVal.textContent = remaining;
+  studyIv = setInterval(()=>{
+    remaining -= 1;
+    if(remaining <= 0){
+      clearInterval(studyIv); studyIv = null;
+      beginCountdown();
+    } else {
+      dom.studyTimerVal.textContent = remaining;
+    }
+  }, 1000);
+}
+
+function skipStudy(){
+  if(state.phase !== 'study') return;
+  if(studyIv){ clearInterval(studyIv); studyIv = null; }
+  beginCountdown();
+}
+dom.studySkipBtn.addEventListener('click', skipStudy);
+
+function beginCountdown(){
+  state.phase = 'countdown';
+  dom.studyScreen.classList.add('hidden');
+  syncMusicToEntry();
+  dom.levelScreen.classList.remove('hidden');
 
   let c = 3;
   dom.countdownVal.textContent = c;
@@ -249,6 +310,7 @@ export async function endGame(){
   state.hasActiveRun = false;
   if(state.raf) cancelAnimationFrame(state.raf);
   playGameOver();
+  playMenuTheme();
   if(state.score > state.best){
     state.best = state.score;
     saveBest(state.best);
@@ -276,8 +338,24 @@ export async function submitInitialsAndShowBoard(){
   await showLeaderboard();
 }
 
+// A real network round trip (Firestore, or just a slow connection) can take
+// a while with no visual feedback, which reads as "nothing happened." Worse:
+// if the player starts a new run *while it's still pending*, the fetch used
+// to land later and yank them out of an active battle with no way back in.
+// The busy-button gives immediate feedback; the state.running check after
+// the await drops the result entirely if a real game has started since.
+function withLeaderboardLoading(btn, fn){
+  return async () => {
+    const originalText = btn ? btn.textContent : null;
+    if(btn){ btn.disabled = true; btn.textContent = 'Loading…'; }
+    try { await fn(); }
+    finally { if(btn){ btn.disabled = false; btn.textContent = originalText; } }
+  };
+}
+
 export async function showLeaderboard(){
   const top = await fetchTopScores();
+  if(state.running) return; // player has since started/resumed a real battle — don't barge in
   dom.leaderboardList.innerHTML = top.length
     ? top.map((e,i)=>`<li><span class="rank">${i+1}.</span><span class="name">${e.initials}</span><span class="pts">${e.score}</span></li>`).join('')
     : '<li class="leaderboard-note">No scores yet — be the first!</li>';
@@ -288,6 +366,13 @@ export async function showLeaderboard(){
 
 export function hideLeaderboard(){
   dom.leaderboardScreen.classList.add('hidden');
+  // Defense in depth: if a battle is somehow running underneath (shouldn't
+  // happen given the guard above, but never leave the player with no way
+  // back into their game), resume it rather than falling through to a menu.
+  if(state.running){
+    if(state.paused) dom.pauseScreen.classList.remove('hidden');
+    return;
+  }
   if(state.phase === 'gameover') dom.endScreen.classList.remove('hidden');
   else dom.startScreen.classList.remove('hidden');
 }
@@ -330,6 +415,19 @@ export function initSettingsUI(){
     });
   }
 
+  if(dom.musicToggleBtn){
+    dom.musicToggleBtn.textContent = state.musicEnabled ? 'On' : 'Off';
+    dom.musicToggleBtn.classList.toggle('off', !state.musicEnabled);
+    dom.musicToggleBtn.addEventListener('click', ()=>{
+      state.musicEnabled = !state.musicEnabled;
+      dom.musicToggleBtn.textContent = state.musicEnabled ? 'On' : 'Off';
+      dom.musicToggleBtn.classList.toggle('off', !state.musicEnabled);
+      saveMusicEnabled(state.musicEnabled);
+      if(state.musicEnabled) unlockAudio();
+      setMusicEnabled(state.musicEnabled);
+    });
+  }
+
   renderDifficultyUI();
 }
 
@@ -339,9 +437,10 @@ dom.quitBtn.addEventListener('click', quitToMenu);
 dom.startBtn.addEventListener('click', startGame);
 dom.retryBtn.addEventListener('click', startGame);
 dom.continueBtn.addEventListener('click', resumeRun);
-if(dom.leaderboardBtn) dom.leaderboardBtn.addEventListener('click', showLeaderboard);
-if(dom.leaderboardBtnEnd) dom.leaderboardBtnEnd.addEventListener('click', showLeaderboard);
-if(dom.initialsSubmitBtn) dom.initialsSubmitBtn.addEventListener('click', submitInitialsAndShowBoard);
+if(dom.leaderboardBtn) dom.leaderboardBtn.addEventListener('click', withLeaderboardLoading(dom.leaderboardBtn, showLeaderboard));
+if(dom.leaderboardBtnEnd) dom.leaderboardBtnEnd.addEventListener('click', withLeaderboardLoading(dom.leaderboardBtnEnd, showLeaderboard));
+if(dom.leaderboardBackBtn) dom.leaderboardBackBtn.addEventListener('click', hideLeaderboard);
+if(dom.initialsSubmitBtn) dom.initialsSubmitBtn.addEventListener('click', withLeaderboardLoading(dom.initialsSubmitBtn, submitInitialsAndShowBoard));
 
 window.addEventListener('keydown', (e)=>{
   if(e.key === 'p' || e.key === 'P' || e.key === 'Escape'){

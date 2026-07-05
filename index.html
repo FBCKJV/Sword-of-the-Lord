@@ -54,6 +54,10 @@
         <span>Sound:</span>
         <button id="soundToggleBtn">On</button>
       </div>
+      <div class="hint-toggle" style="margin-bottom:0;">
+        <span>Music:</span>
+        <button id="musicToggleBtn">On</button>
+      </div>
     </div>
 
     <div class="difficulty-row" id="difficultyRow"></div>
@@ -74,6 +78,20 @@
       <h1 style="font-size:32px;">Stand Fast</h1>
       <button class="playbtn" id="resumeBtn" style="margin-bottom:14px;">Resume</button>
       <div><button class="playbtn" id="quitBtn" style="background:transparent; border:1px solid rgba(212,175,55,0.4); box-shadow:none; color:var(--parchment-dim);">Quit to Menu</button></div>
+    </div>
+  </div>
+
+  <div class="overlay study-screen hidden" id="studyScreen">
+    <div class="study-bg"></div>
+    <div class="study-panel">
+      <div class="eyebrow">Study The Word</div>
+      <div class="level-ref" id="studyRef"></div>
+      <div class="level-verse" id="studyVerse"></div>
+      <div class="study-facing" id="studyFacing"></div>
+    </div>
+    <div class="study-footer">
+      <div class="study-timer"><span id="studyTimerVal">12</span>s</div>
+      <button class="playbtn" id="studySkipBtn">I Am Ready</button>
     </div>
   </div>
 

@@ -5,12 +5,15 @@ import { loadImages } from './data/images.js';
 import { loadSettings } from './ui/settings.js';
 import { initSettingsUI, setLoopFn } from './ui/screens.js';
 import { renderBadgesGrid } from './ui/badges.js';
+import { unlockAudio } from './ui/sound.js';
+import { playMenuTheme } from './ui/music.js';
 import { loop } from './core/loop.js';
 import './core/input.js'; // attaches pointerdown listener
 
 const settings = loadSettings();
 state.hintEnabled = settings.hintEnabled;
 state.soundEnabled = settings.soundEnabled;
+state.musicEnabled = settings.musicEnabled;
 state.best = settings.best;
 state.difficulty = settings.difficulty;
 
@@ -29,6 +32,14 @@ loadImages().then(()=>{
   dom.loadScreen.classList.add('hidden');
   dom.startScreen.classList.remove('hidden');
 });
+
+// Autoplay policy requires a real user gesture before any audio can play —
+// the menu theme starts on whichever tap/click reaches the page first
+// (a settings toggle, a difficulty pick, or Draw the Sword itself).
+window.addEventListener('pointerdown', () => {
+  unlockAudio();
+  playMenuTheme();
+}, { once: true });
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{

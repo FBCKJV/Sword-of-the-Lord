@@ -2,7 +2,7 @@
 // fetch fresh files instead of serving the previous cache. Same pattern as
 // the Hymns app: one version string, cache name derived from it, old caches
 // swept on activate.
-const VERSION = 'v4';
+const VERSION = 'v6';
 const CACHE_NAME = `sword-of-the-lord-${VERSION}`;
 
 const PRECACHE_URLS = [
@@ -11,6 +11,7 @@ const PRECACHE_URLS = [
   './manifest.json',
   './css/style.css',
   './js/main.js',
+  './js/core/audio-context.js',
   './js/core/dom.js',
   './js/core/draw.js',
   './js/core/fx.js',
@@ -28,6 +29,7 @@ const PRECACHE_URLS = [
   './js/firebase/leaderboard.js',
   './js/ui/badges.js',
   './js/ui/mastery.js',
+  './js/ui/music.js',
   './js/ui/screens.js',
   './js/ui/settings.js',
   './js/ui/sound.js',
@@ -36,6 +38,7 @@ const PRECACHE_URLS = [
   './assets/icons/icon-maskable-512.png',
   './assets/icons/apple-touch-icon.png',
   './assets/icons/favicon.ico',
+  './assets/backgrounds/study.jpg',
   './assets/demons/flameimp_laughing.jpg', './assets/demons/flameimp_struck.jpg',
   './assets/demons/hellhound_laughing.jpg', './assets/demons/hellhound_struck.jpg',
   './assets/demons/wraith_laughing.jpg', './assets/demons/wraith_struck.jpg',
