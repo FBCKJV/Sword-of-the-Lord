@@ -2,7 +2,7 @@
 // fetch fresh files instead of serving the previous cache. Same pattern as
 // the Hymns app: one version string, cache name derived from it, old caches
 // swept on activate.
-const VERSION = 'v7';
+const VERSION = 'v8';
 const CACHE_NAME = `sword-of-the-lord-${VERSION}`;
 
 const PRECACHE_URLS = [
