@@ -46,3 +46,20 @@ export function playGameOver(){
 export function playBadgeUnlock(){
   [784, 987.77, 1174.66].forEach((f,i)=> tone({ freq:f, dur:0.3, type:'sine', gain:0.16, delay:i*0.07 }));
 }
+// Milestone fanfare climbs in pitch the longer the streak runs.
+export function playComboMilestone(combo){
+  const base = Math.min(1400, 500 + combo*22);
+  tone({ freq:base, dur:0.12, type:'triangle', gain:0.16 });
+  tone({ freq:base*1.5, dur:0.2, type:'triangle', gain:0.14, delay:0.07 });
+}
+export function playMercy(){
+  [523.25, 659.25, 880].forEach((f,i)=> tone({ freq:f, dur:0.3, type:'sine', gain:0.13, delay:i*0.08 }));
+}
+export function playSelah(){
+  tone({ freq:196, dur:0.9, type:'sine', gain:0.14 });
+  tone({ freq:294, dur:0.9, type:'sine', gain:0.1, delay:0.05 });
+}
+export function playDemonCast(){
+  tone({ freq:110, glideTo:65, dur:0.4, type:'sawtooth', gain:0.14 });
+  tone({ freq:220, glideTo:140, dur:0.25, type:'square', gain:0.05, delay:0.05 });
+}

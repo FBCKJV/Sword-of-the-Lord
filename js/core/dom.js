@@ -26,6 +26,7 @@ export const dom = {
   stripWords: document.getElementById('stripWords'),
   hintToggleBtn: document.getElementById('hintToggleBtn'),
   soundToggleBtn: document.getElementById('soundToggleBtn'),
+  difficultyRow: document.getElementById('difficultyRow'),
   pauseBtn: document.getElementById('pauseBtn'),
   pauseScreen: document.getElementById('pauseScreen'),
   resumeBtn: document.getElementById('resumeBtn'),

@@ -12,6 +12,7 @@ const settings = loadSettings();
 state.hintEnabled = settings.hintEnabled;
 state.soundEnabled = settings.soundEnabled;
 state.best = settings.best;
+state.difficulty = settings.difficulty;
 
 setLoopFn(loop);
 initSettingsUI();

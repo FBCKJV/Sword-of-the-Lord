@@ -36,8 +36,11 @@ export function drawDevil(){
   ctx.globalAlpha = dieAlpha;
   ctx.translate(W/2 + shk, devil.y0 + bob);
 
+  // vignette glow — flares hot red while the demon winds up a cast
+  const casting = state.castTelegraph > 0;
+  const pulse = casting ? 0.5 + 0.3*Math.sin(performance.now()/60) : 0.35;
   const glow = ctx.createRadialGradient(0,0,10,0,0,dw*0.7);
-  glow.addColorStop(0, 'rgba(179,49,29,0.35)');
+  glow.addColorStop(0, `rgba(${casting ? '255,60,20' : '179,49,29'},${pulse})`);
   glow.addColorStop(1, 'rgba(179,49,29,0)');
   ctx.fillStyle = glow;
   ctx.beginPath(); ctx.arc(0,0,dw*0.7,0,Math.PI*2); ctx.fill();
@@ -76,9 +79,17 @@ export function drawSwordAndArm(){
   ctx.restore();
 }
 
+// The slash burns hotter as the streak climbs: steel -> gold -> flame.
+function slashRGB(){
+  if(state.combo >= 12) return '255,157,92';
+  if(state.combo >= 5) return '244,217,118';
+  return '244,247,248';
+}
+
 export function drawSlashStreak(){
   const slashFx = state.slashFx;
   if(!slashFx.active) return;
+  const rgb = slashRGB();
   const p = slashFx.t / slashFx.dur;
   const travel = W + 500;
   const trailCount = 9;
@@ -95,9 +106,9 @@ export function drawSlashStreak(){
     ctx.translate(tx, slashFx.y - i*3*slashFx.dir);
     ctx.rotate(slashFx.dir > 0 ? -0.32 : 0.32);
     const grad = ctx.createLinearGradient(-len/2,0,len/2,0);
-    grad.addColorStop(0, 'rgba(244,247,248,0)');
-    grad.addColorStop(0.5, `rgba(244,247,248,${alpha})`);
-    grad.addColorStop(1, 'rgba(244,247,248,0)');
+    grad.addColorStop(0, `rgba(${rgb},0)`);
+    grad.addColorStop(0.5, `rgba(${rgb},${alpha})`);
+    grad.addColorStop(1, `rgba(${rgb},0)`);
     ctx.fillStyle = grad;
     ctx.fillRect(-len/2, -(4-i*0.25), len, Math.max(1.5,8-i*0.7));
     ctx.restore();
@@ -134,6 +145,86 @@ export function drawTile(tile, isDecoy){
   ctx.restore();
 }
 
+function drawPowerup(p){
+  ctx.save();
+  ctx.translate(p.x, p.y);
+  const pulse = 0.75 + 0.25*Math.sin(performance.now()/180);
+  if(p.kind === 'dove'){
+    const glow = ctx.createRadialGradient(0,0,4,0,0,34);
+    glow.addColorStop(0, `rgba(244,247,248,${0.5*pulse})`);
+    glow.addColorStop(1, 'rgba(244,247,248,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath(); ctx.arc(0,0,34,0,Math.PI*2); ctx.fill();
+    // shield shape, same silhouette as the HUD shields
+    ctx.fillStyle = '#e8f0f4';
+    ctx.strokeStyle = '#c8d3d9';
+    ctx.beginPath();
+    ctx.moveTo(0,-16); ctx.lineTo(14,-10); ctx.lineTo(14,2);
+    ctx.lineTo(0,16); ctx.lineTo(-14,2); ctx.lineTo(-14,-10);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = 'rgba(28,20,14,0.5)'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(0,-9); ctx.lineTo(0,8); ctx.moveTo(-6,-2); ctx.lineTo(6,-2); ctx.stroke();
+  } else {
+    const glow = ctx.createRadialGradient(0,0,4,0,0,34);
+    glow.addColorStop(0, `rgba(184,156,224,${0.5*pulse})`);
+    glow.addColorStop(1, 'rgba(184,156,224,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath(); ctx.arc(0,0,34,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(24,17,28,0.9)';
+    ctx.strokeStyle = '#b89ce0'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0,0,20,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#d8c8f0';
+    ctx.font = '700 9px Cinzel, Georgia, serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('SELAH', 0, 1);
+  }
+  ctx.restore();
+}
+
+function drawFog(){
+  const fog = state.fog;
+  if(!fog) return;
+  ctx.save();
+  ctx.globalAlpha = 0.92 * fog.alpha;
+  const g = ctx.createLinearGradient(fog.x, 0, fog.x + fog.w, 0);
+  g.addColorStop(0, 'rgba(10,7,5,0)');
+  g.addColorStop(0.25, 'rgba(14,10,8,0.97)');
+  g.addColorStop(0.75, 'rgba(14,10,8,0.97)');
+  g.addColorStop(1, 'rgba(10,7,5,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(fog.x, 40, fog.w, H - 260);
+  ctx.restore();
+}
+
+function drawComboMeter(){
+  if(state.combo < 2 || state.phase !== 'battle') return;
+  ctx.save();
+  const flash = Math.max(0, state.comboFlash);
+  const size = 15 + Math.min(10, state.combo*0.4) + flash*8;
+  ctx.font = `800 ${size}px Cinzel, Georgia, serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const rgb = slashRGB();
+  ctx.shadowColor = `rgba(${rgb},${0.5 + flash*0.5})`;
+  ctx.shadowBlur = 12 + flash*18;
+  ctx.fillStyle = `rgba(${rgb},${0.85 + flash*0.15})`;
+  ctx.fillText('×' + state.combo, W/2, 52);
+  ctx.restore();
+}
+
+function drawPopups(){
+  state.popups.forEach(p=>{
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, Math.min(1, p.life*1.4));
+    ctx.font = `700 ${p.size}px Cinzel, Georgia, serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(0,0,0,0.7)';
+    ctx.shadowBlur = 6;
+    ctx.fillStyle = p.color;
+    ctx.fillText(p.text, p.x, p.y);
+    ctx.restore();
+  });
+}
+
 export function drawBanner(){
   if(state.bannerTimer <= 0) return;
   const alpha = Math.min(1, state.bannerTimer*1.5);
@@ -146,10 +237,10 @@ export function drawBanner(){
   ctx.fillStyle = '#f4d976';
   ctx.font = '800 30px Cinzel, Georgia, serif';
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText('IT IS WRITTEN', W/2, H/2-8);
+  ctx.fillText(state.bannerText || 'IT IS WRITTEN', W/2, H/2-8);
   ctx.font = 'italic 15px "EB Garamond", Georgia, serif';
   ctx.fillStyle = 'rgba(236,223,192,0.85)';
-  ctx.fillText(state.currentVerse.ref, W/2, H/2+20);
+  ctx.fillText(state.bannerSub || (state.currentVerse ? state.currentVerse.ref : ''), W/2, H/2+20);
   ctx.restore();
 }
 
@@ -161,8 +252,14 @@ export function draw(){
 
   drawBackground();
   drawDevil();
-  if(state.activeTile) drawTile(state.activeTile, false);
+
+  // Draw order is deliberate: chaff first, mercy tiles next, verse words
+  // LAST — the word the player owes can never be buried under a decoy.
   state.decoys.forEach(d=>drawTile(d, true));
+  state.powerups.forEach(drawPowerup);
+  state.verseTiles.forEach(t=>drawTile(t, false));
+
+  drawFog();
 
   state.particles.forEach(p=>{
     ctx.beginPath(); ctx.fillStyle = p.color;
@@ -173,6 +270,8 @@ export function draw(){
 
   drawSlashStreak();
   drawSwordAndArm();
+  drawComboMeter();
+  drawPopups();
   drawBanner();
 
   if(state.flashTimer>0){

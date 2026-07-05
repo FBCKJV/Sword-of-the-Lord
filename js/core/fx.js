@@ -15,3 +15,13 @@ export function burst(x,y,color,n){
     state.particles.push({ x,y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, life:1, color, size:2+Math.random()*3.5 });
   }
 }
+
+export function addPopup(x, y, text, color = '#f4d976', size = 18){
+  state.popups.push({ x, y, text, color, size, life: 1 });
+}
+
+export function showBanner(text, sub, dur = 1.6){
+  state.bannerText = text;
+  state.bannerSub = sub;
+  state.bannerTimer = dur;
+}
