@@ -210,10 +210,18 @@ button.playbtn:active{ transform:translateY(4px); box-shadow:0 2px 0 #6e1c11, 0 
   display:flex; align-items:center; gap:12px;
   background:rgba(12,9,8,0.95); border:1px solid var(--gold); border-radius:8px;
   padding:10px 16px; z-index:30; font-size:12px; letter-spacing:0.5px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.6); transition:transform 0.3s ease;
+  box-shadow:0 10px 30px rgba(0,0,0,0.6);
+  transition:transform 0.3s ease, opacity 0.3s ease;
   max-width:90%;
+  /* On phones taller than the 3:5 game frame, the slid-down resting position
+     lands BELOW the frame but still inside the visible screen — so the banner
+     must also be invisible at rest, not merely translated away. */
+  visibility:hidden; opacity:0; pointer-events:none;
 }
-.update-banner.show{ transform:translateX(-50%) translateY(0); }
+.update-banner.show{
+  transform:translateX(-50%) translateY(0);
+  visibility:visible; opacity:1; pointer-events:auto;
+}
 .update-banner button{
   background:var(--gold); color:var(--ink); border:none; border-radius:14px;
   padding:6px 14px; font-family:'Cinzel',serif; font-size:10px; letter-spacing:1.5px;

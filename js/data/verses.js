@@ -29,14 +29,27 @@ export const VERSE_TIERS = {
     { ref:"Ephesians 6:17", text:"And take the helmet of salvation, and the sword of the Spirit, which is the word of God." },
     { ref:"Ephesians 6:11", text:"Put on the whole armour of God, that ye may be able to stand against the wiles of the devil." },
     { ref:"Proverbs 1:7", text:"The fear of the LORD is the beginning of knowledge: but fools despise wisdom and instruction." },
-    { ref:"Romans 8:37", text:"Nay, in all these things we are more than conquerors through him that loved us." }
+    { ref:"Romans 8:37", text:"Nay, in all these things we are more than conquerors through him that loved us." },
+    // Romans Road
+    { ref:"Romans 10:13", text:"For whosoever shall call upon the name of the Lord shall be saved." },
+    { ref:"Romans 5:8", text:"But God commendeth his love toward us, in that, while we were yet sinners, Christ died for us." },
+    // Eternal security
+    { ref:"Ephesians 4:30", text:"And grieve not the holy Spirit of God, whereby ye are sealed unto the day of redemption." }
   ],
   4: [
     { ref:"1 Peter 5:8", text:"Be sober, be vigilant; because your adversary the devil, as a roaring lion, walketh about, seeking whom he may devour." },
     { ref:"Romans 6:23", text:"For the wages of sin is death; but the gift of God is eternal life through Jesus Christ our Lord." },
     { ref:"2 Timothy 1:7", text:"For God hath not given us the spirit of fear; but of power, and of love, and of a sound mind." },
     { ref:"John 3:16", text:"For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life." },
-    { ref:"Galatians 2:20", text:"I am crucified with Christ: nevertheless I live; yet not I, but Christ liveth in me:" }
+    { ref:"Galatians 2:20", text:"I am crucified with Christ: nevertheless I live; yet not I, but Christ liveth in me:" },
+    // Romans Road
+    { ref:"Romans 10:9", text:"That if thou shalt confess with thy mouth the Lord Jesus, and shalt believe in thine heart that God hath raised him from the dead, thou shalt be saved." },
+    // Eternal security
+    { ref:"John 10:28", text:"And I give unto them eternal life; and they shall never perish, neither shall any man pluck them out of my hand." },
+    { ref:"John 6:37", text:"All that the Father giveth me shall come to me; and him that cometh to me I will in no wise cast out." },
+    { ref:"Romans 8:1", text:"There is therefore now no condemnation to them which are in Christ Jesus, who walk not after the flesh, but after the Spirit." },
+    { ref:"Philippians 1:6", text:"Being confident of this very thing, that he which hath begun a good work in you will perform it until the day of Jesus Christ:" },
+    { ref:"1 Peter 1:5", text:"Who are kept by the power of God through faith unto salvation ready to be revealed in the last time." }
   ]
 };
 
@@ -44,7 +57,8 @@ export const BOSS_VERSES = [
   { ref:"Revelation 12:11", text:"And they overcame him by the blood of the Lamb, and by the word of their testimony; and they loved not their lives unto the death." },
   { ref:"1 John 4:4", text:"Ye are of God, little children, and have overcome them: because greater is he that is in you, than he that is in the world." },
   { ref:"Romans 16:20", text:"And the God of peace shall bruise Satan under your feet shortly. Grace be with you. Amen." },
-  { ref:"Luke 10:19", text:"Behold, I give unto you power to tread on serpents and scorpions, and over all the power of the enemy: and nothing shall by any means hurt you." }
+  { ref:"Luke 10:19", text:"Behold, I give unto you power to tread on serpents and scorpions, and over all the power of the enemy: and nothing shall by any means hurt you." },
+  { ref:"John 5:24", text:"Verily, verily, I say unto you, He that heareth my word, and believeth on him that sent me, hath everlasting life, and shall not come into condemnation; but is passed from death unto life." }
 ];
 
 export const CHAFF = ["therefore","wherefore","verily","peradventure","notwithstanding","howbeit","forasmuch",

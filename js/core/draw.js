@@ -1,6 +1,6 @@
 import { state } from './state.js';
 import { ctx, W, H } from './dom.js';
-import { IMAGES } from '../data/images.js';
+import { SPRITES } from '../data/images.js';
 
 export function drawBackground(){
   const g = ctx.createLinearGradient(0,0,0,H);
@@ -17,8 +17,10 @@ export function drawDevil(){
   const devil = state.devil;
   if(devil.dying > 0 && devil.dying < 0.02) return;
   const stateKey = devil.hitFlash > 0.15 ? 'struck' : 'laughing';
-  const img = IMAGES[devil.key + '_' + stateKey];
-  if(!img || !img.complete) return;
+  const img = SPRITES[devil.key + '_' + stateKey];
+  if(!img) return;
+  const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+  if(!iw || !ih) return;
 
   ctx.save();
   const bob = Math.sin(devil.bobPhase)*6;
@@ -27,7 +29,7 @@ export function drawDevil(){
   const dieAlpha = devil.dying>0 ? devil.dying : 1;
 
   const baseW = devil.isBoss ? 300 : 210;
-  const ratio = img.naturalHeight / img.naturalWidth;
+  const ratio = ih / iw;
   let dw = baseW * devil.scale * dieScale;
   let dh = dw * ratio;
   const maxDh = 420;
