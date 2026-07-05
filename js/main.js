@@ -32,11 +32,19 @@ loadImages().then(()=>{
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
     navigator.serviceWorker.register('sw.js').then(reg=>{
+      // reg.waiting is only ever populated when an existing active worker is
+      // being superseded — a genuinely fresh install has no prior worker to
+      // wait behind, so it skips straight to activating. Checking `waiting`
+      // (rather than navigator.serviceWorker.controller, which can be flaky
+      // around first-install timing) is what actually distinguishes "there's
+      // a real update sitting here" from "this is just the first install."
+      if(reg.waiting) dom.updateBanner.classList.add('show');
+
       reg.addEventListener('updatefound', ()=>{
         const fresh = reg.installing;
         if(!fresh) return;
         fresh.addEventListener('statechange', ()=>{
-          if(fresh.state === 'installed' && navigator.serviceWorker.controller){
+          if(fresh.state === 'installed' && reg.waiting){
             dom.updateBanner.classList.add('show');
           }
         });
@@ -61,6 +69,9 @@ if('serviceWorker' in navigator){
       updateAccepted = true;
       navigator.serviceWorker.getRegistration().then(reg=>{
         if(reg && reg.waiting) reg.waiting.postMessage('SKIP_WAITING');
+        // No waiting worker (already activated on its own, or nothing to
+        // do) — reload directly instead of leaving the button inert.
+        else window.location.reload();
       });
     });
   });
