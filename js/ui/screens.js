@@ -119,6 +119,16 @@ export function quitToMenu(){
 }
 
 export function resumeRun(){
+  // Quitting from the victory screen leaves the just-won battle behind —
+  // resuming means moving on to the next round's study screen, not
+  // re-entering the dead fight.
+  if(state.pendingVictoryContinue){
+    state.pendingVictoryContinue = false;
+    dom.startScreen.classList.add('hidden');
+    state.levelIdx++;
+    beginLevel();
+    return;
+  }
   dom.startScreen.classList.add('hidden');
   dom.pauseBtn.classList.add('show');
   if(state.stripVisible) dom.verseStrip.classList.remove('hidden');
@@ -138,9 +148,10 @@ function syncMusicToEntry(){
 export function startGame(){
   unlockAudio();
   state.levelIdx = 0; state.score = 0; state.lives = 3;
-  state.tierDecks = {}; state.bossDeck = []; state.levelPlan = [];
+  state.tierDecks = {}; state.bossTierDecks = {}; state.levelPlan = [];
   state.graceShield = false;
   state.hasActiveRun = true;
+  state.pendingVictoryContinue = false;
   dom.startScreen.classList.add('hidden');
   dom.endScreen.classList.add('hidden');
   dom.scoreVal.textContent = '0';
@@ -165,7 +176,7 @@ export function beginLevel(){
   const roundIdx = Math.floor(state.levelIdx / (DEMONS.length+1));
 
   if(state.currentEntry.type === 'boss'){
-    state.currentVerse = drawBossVerse();
+    state.currentVerse = drawBossVerse(roundIdx);
     state.devil.isBoss = true;
     state.devil.key = 'satan';
     state.devil.scale = 1.15 + roundIdx*0.08;
@@ -333,6 +344,19 @@ function continueAfterVictory(){
 }
 dom.victoryContinueBtn.addEventListener('click', continueAfterVictory);
 
+// Quitting here doesn't end the run — the boss is already dead, there's
+// just no live battle left to sit in. Continue (from the start screen)
+// picks up by moving on to the next round, same as tapping Onward.
+function quitAfterVictory(){
+  state.pendingVictoryContinue = true;
+  dom.victoryScreen.classList.add('hidden');
+  dom.continueBtn.classList.remove('hidden');
+  dom.startScreen.classList.remove('hidden');
+  renderBadgesGrid(dom);
+  playMenuTheme();
+}
+if(dom.victoryQuitBtn) dom.victoryQuitBtn.addEventListener('click', quitAfterVictory);
+
 export async function endGame(){
   state.running = false; state.phase = 'gameover';
   state.hasActiveRun = false;
@@ -358,6 +382,14 @@ export async function endGame(){
   const qualifies = qualifiesForBoard(Math.floor(state.score), top);
   if(dom.initialsPrompt) dom.initialsPrompt.classList.toggle('hidden', !qualifies);
 }
+
+function backToMenuFromEnd(){
+  dom.endScreen.classList.add('hidden');
+  dom.startScreen.classList.remove('hidden');
+  renderBadgesGrid(dom);
+  playMenuTheme();
+}
+if(dom.endMenuBtn) dom.endMenuBtn.addEventListener('click', backToMenuFromEnd);
 
 export async function submitInitialsAndShowBoard(){
   const initials = initialsInputs().map(i => i.value || '-').join('');

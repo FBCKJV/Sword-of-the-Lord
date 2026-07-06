@@ -49,12 +49,13 @@ export const state = {
   combo: 0,
   comboFlash: 0,        // milestone pulse timer for the combo meter
   hasActiveRun: false,
+  pendingVictoryContinue: false,
   levelPerfect: true,
   graceShield: false,   // one-hit shield earned by a perfect verse
   mercySpawnedThisVerse: false,
   selahSpawnedThisVerse: false,
   best: 0,
   tierDecks: {},
-  bossDeck: [],
+  bossTierDecks: {},
   levelPlan: []
 };

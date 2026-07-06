@@ -1,5 +1,5 @@
 import { state } from './state.js';
-import { VERSE_TIERS, BOSS_VERSES } from '../data/verses.js';
+import { VERSE_TIERS, BOSS_VERSE_TIERS } from '../data/verses.js';
 import { DEMONS } from '../data/demons.js';
 
 export function shuffle(arr){
@@ -20,9 +20,12 @@ export function drawVerse(tier){
   return state.tierDecks[tier].pop();
 }
 
-export function drawBossVerse(){
-  if(state.bossDeck.length === 0) state.bossDeck = shuffle(BOSS_VERSES);
-  return state.bossDeck.pop();
+export function drawBossVerse(roundIdx){
+  const tier = Math.max(1, Math.min(4, roundIdx + 1));
+  if(!state.bossTierDecks[tier] || state.bossTierDecks[tier].length === 0){
+    state.bossTierDecks[tier] = shuffle(BOSS_VERSE_TIERS[tier]);
+  }
+  return state.bossTierDecks[tier].pop();
 }
 
 // Level plan is rebuilt per round; demon order reshuffled each round.

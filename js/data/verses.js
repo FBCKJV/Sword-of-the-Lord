@@ -53,13 +53,23 @@ export const VERSE_TIERS = {
   ]
 };
 
-export const BOSS_VERSES = [
-  { ref:"Revelation 12:11", text:"And they overcame him by the blood of the Lamb, and by the word of their testimony; and they loved not their lives unto the death." },
-  { ref:"1 John 4:4", text:"Ye are of God, little children, and have overcome them: because greater is he that is in you, than he that is in the world." },
-  { ref:"Romans 16:20", text:"And the God of peace shall bruise Satan under your feet shortly. Grace be with you. Amen." },
-  { ref:"Luke 10:19", text:"Behold, I give unto you power to tread on serpents and scorpions, and over all the power of the enemy: and nothing shall by any means hurt you." },
-  { ref:"John 5:24", text:"Verily, verily, I say unto you, He that heareth my word, and believeth on him that sent me, hath everlasting life, and shall not come into condemnation; but is passed from death unto life." }
-];
+// Boss (Satan) verses, tiered short-to-long by round so the first few
+// Satan fights aren't as much of a wall as the later ones.
+export const BOSS_VERSE_TIERS = {
+  1: [
+    { ref:"Romans 16:20", text:"And the God of peace shall bruise Satan under your feet shortly. Grace be with you. Amen." }
+  ],
+  2: [
+    { ref:"1 John 4:4", text:"Ye are of God, little children, and have overcome them: because greater is he that is in you, than he that is in the world." }
+  ],
+  3: [
+    { ref:"Revelation 12:11", text:"And they overcame him by the blood of the Lamb, and by the word of their testimony; and they loved not their lives unto the death." }
+  ],
+  4: [
+    { ref:"Luke 10:19", text:"Behold, I give unto you power to tread on serpents and scorpions, and over all the power of the enemy: and nothing shall by any means hurt you." },
+    { ref:"John 5:24", text:"Verily, verily, I say unto you, He that heareth my word, and believeth on him that sent me, hath everlasting life, and shall not come into condemnation; but is passed from death unto life." }
+  ]
+};
 
 export const CHAFF = ["therefore","wherefore","verily","peradventure","notwithstanding","howbeit","forasmuch",
   "hereunto","whensoever","nevertheless","thence","hitherto","wherewithal","aforetime","behold",

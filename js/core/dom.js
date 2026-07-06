@@ -12,6 +12,7 @@ export const dom = {
   startBtn: document.getElementById('startBtn'),
   continueBtn: document.getElementById('continueBtn'),
   retryBtn: document.getElementById('retryBtn'),
+  endMenuBtn: document.getElementById('endMenuBtn'),
   levelEyebrow: document.getElementById('levelEyebrow'),
   levelRef: document.getElementById('levelRef'),
   levelVerse: document.getElementById('levelVerse'),
@@ -62,7 +63,8 @@ export const dom = {
   victoryVerse: document.getElementById('victoryVerse'),
   victoryScoreVal: document.getElementById('victoryScoreVal'),
   victoryRoundLine: document.getElementById('victoryRoundLine'),
-  victoryContinueBtn: document.getElementById('victoryContinueBtn')
+  victoryContinueBtn: document.getElementById('victoryContinueBtn'),
+  victoryQuitBtn: document.getElementById('victoryQuitBtn')
 };
 
 export function initialsInputs(){
