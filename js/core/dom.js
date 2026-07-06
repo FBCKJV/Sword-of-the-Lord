@@ -42,6 +42,7 @@ export const dom = {
   badgeToast: document.getElementById('badgeToast'),
   badgesGrid: document.getElementById('badgesGrid'),
   leaderboardScreen: document.getElementById('leaderboardScreen'),
+  leaderboardTabs: document.getElementById('leaderboardTabs'),
   leaderboardList: document.getElementById('leaderboardList'),
   leaderboardBtn: document.getElementById('leaderboardBtn'),
   leaderboardBtnEnd: document.getElementById('leaderboardBtnEnd'),

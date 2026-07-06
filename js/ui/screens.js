@@ -354,14 +354,14 @@ export async function endGame(){
   state.paused = false;
   dom.endScreen.classList.remove('hidden');
 
-  const top = await fetchTopScores();
+  const top = await fetchTopScores(state.difficulty);
   const qualifies = qualifiesForBoard(Math.floor(state.score), top);
   if(dom.initialsPrompt) dom.initialsPrompt.classList.toggle('hidden', !qualifies);
 }
 
 export async function submitInitialsAndShowBoard(){
   const initials = initialsInputs().map(i => i.value || '-').join('');
-  await submitScore(initials, Math.floor(state.score));
+  await submitScore(initials, Math.floor(state.score), state.difficulty);
   if(dom.initialsPrompt) dom.initialsPrompt.classList.add('hidden');
   await showLeaderboard();
 }
@@ -381,12 +381,42 @@ function withLeaderboardLoading(btn, fn){
   };
 }
 
-export async function showLeaderboard(){
-  const top = await fetchTopScores();
-  if(state.running) return; // player has since started/resumed a real battle — don't barge in
+let lbDifficulty = 'standard';
+
+function renderLeaderboardTabs(){
+  if(!dom.leaderboardTabs) return;
+  dom.leaderboardTabs.innerHTML = '';
+  Object.values(DIFFICULTIES).forEach(d=>{
+    const btn = document.createElement('button');
+    btn.className = 'lb-tab' + (lbDifficulty === d.key ? ' active' : '');
+    btn.textContent = d.label;
+    btn.addEventListener('click', ()=> selectLeaderboardTab(d.key));
+    dom.leaderboardTabs.appendChild(btn);
+  });
+}
+
+function renderScoreList(top){
   dom.leaderboardList.innerHTML = top.length
     ? top.map((e,i)=>`<li><span class="rank">${i+1}.</span><span class="name">${e.initials}</span><span class="pts">${e.score}</span></li>`).join('')
     : '<li class="leaderboard-note">No scores yet — be the first!</li>';
+}
+
+async function selectLeaderboardTab(difficulty){
+  if(lbDifficulty === difficulty) return;
+  lbDifficulty = difficulty;
+  renderLeaderboardTabs();
+  dom.leaderboardList.innerHTML = '<li class="leaderboard-note">Loading…</li>';
+  const top = await fetchTopScores(lbDifficulty);
+  if(lbDifficulty !== difficulty) return; // a newer tab click superseded this fetch
+  renderScoreList(top);
+}
+
+export async function showLeaderboard(){
+  lbDifficulty = state.difficulty;
+  const top = await fetchTopScores(lbDifficulty);
+  if(state.running) return; // player has since started/resumed a real battle — don't barge in
+  renderLeaderboardTabs();
+  renderScoreList(top);
   dom.startScreen.classList.add('hidden');
   dom.endScreen.classList.add('hidden');
   dom.leaderboardScreen.classList.remove('hidden');

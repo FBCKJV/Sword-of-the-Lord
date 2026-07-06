@@ -10,5 +10,12 @@ export const firebaseConfig = {
   appId: '1:749844151889:web:ba8525839b67cb96254270'
 };
 
-// Firestore collection name for the arcade high-score table.
-export const LEADERBOARD_COLLECTION = 'sword_of_the_lord_scores';
+// Firestore collection per difficulty — kept separate (rather than one
+// collection with a difficulty field) so each board's query is a plain
+// orderBy(score desc) that Firestore indexes automatically, no composite
+// index to set up.
+export const LEADERBOARD_COLLECTIONS = {
+  easy: 'sword_of_the_lord_scores_easy',
+  standard: 'sword_of_the_lord_scores_standard',
+  valiant: 'sword_of_the_lord_scores_valiant'
+};
