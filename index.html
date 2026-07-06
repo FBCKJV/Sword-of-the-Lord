@@ -18,8 +18,7 @@
   <canvas id="game" width="480" height="800"></canvas>
 
   <div class="loadscreen" id="loadScreen">
-    <div class="eyebrow">Preparing</div>
-    <h1 style="font-size:28px;">Sharpening the Blade…</h1>
+    <img class="splash-img" src="assets/backgrounds/splash.jpg" alt="Sword of the Lord — A KJV Bible Game">
   </div>
 
   <div class="hud">
@@ -64,6 +63,24 @@
     <button class="playbtn" id="startBtn">Draw the Sword</button>
     <div class="controls-hint">tap the correct word as it falls · avoid the grey chaff</div>
     <button class="badges-link" id="leaderboardBtn">View Leaderboard</button>
+    <button class="badges-link" id="howToPlayBtn">How to Play</button>
+  </div>
+
+  <div class="modal-backdrop hidden" id="introModal">
+    <div class="modal-card">
+      <button class="modal-close" id="introCloseBtn" aria-label="Close">&times;</button>
+      <div class="eyebrow">How To Play</div>
+      <h1 style="font-size:26px;">Take Up The Sword</h1>
+      <div class="intro-body">
+        <p>Each level shows you a verse to study. When the battle begins, its words fall from above — tap them in order, first to last, before the devil's grey chaff leads your blade astray. Miss a word or strike the wrong one and you'll lose a Shield of Faith; lose them all and the fight ends.</p>
+        <div class="intro-diff">
+          <div class="intro-diff-item"><b>Easy</b> — a gentle drill. The verse lingers on screen a few seconds after the fight starts before fading away.</div>
+          <div class="intro-diff-item"><b>Standard</b> — the good fight. No on-screen hint once the battle begins — you strike from memory.</div>
+          <div class="intro-diff-item"><b>Valiant</b> — quit you like men. No hint, and no gold tell marking the true words from the chaff — every word looks the same.</div>
+        </div>
+      </div>
+      <button class="playbtn" id="introOkBtn">Amen</button>
+    </div>
   </div>
 
   <div class="pauseBtn" id="pauseBtn"><span><i></i><i></i></span></div>

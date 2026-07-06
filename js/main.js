@@ -2,8 +2,8 @@ import { state } from './core/state.js';
 import { dom } from './core/dom.js';
 import { drawBackground, drawSwordAndArm } from './core/draw.js';
 import { loadImages } from './data/images.js';
-import { loadSettings } from './ui/settings.js';
-import { initSettingsUI, setLoopFn } from './ui/screens.js';
+import { loadSettings, hasSeenIntro } from './ui/settings.js';
+import { initSettingsUI, setLoopFn, showIntroModal } from './ui/screens.js';
 import { renderBadgesGrid } from './ui/badges.js';
 import { unlockAudio } from './ui/sound.js';
 import { playMenuTheme } from './ui/music.js';
@@ -27,9 +27,18 @@ window.__sotl = { state, dom };
 drawBackground();
 drawSwordAndArm();
 
-loadImages().then(()=>{
+// Old-cartridge-style splash: hold the title screen for a fixed stretch
+// (running in parallel with real asset loading, whichever takes longer)
+// before revealing the main menu.
+const SPLASH_MS = 17000;
+
+Promise.all([
+  loadImages(),
+  new Promise(resolve => setTimeout(resolve, SPLASH_MS))
+]).then(()=>{
   dom.loadScreen.classList.add('hidden');
   dom.startScreen.classList.remove('hidden');
+  if(!hasSeenIntro()) showIntroModal();
 });
 
 // Autoplay policy requires a real user gesture before any audio can play —

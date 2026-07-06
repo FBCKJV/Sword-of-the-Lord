@@ -176,8 +176,35 @@ button.playbtn:active{ transform:translateY(4px); box-shadow:0 2px 0 #6e1c11, 0 
 .loadscreen{
   position:absolute; inset:0; background:var(--ink); z-index:20;
   display:flex; align-items:center; justify-content:center; flex-direction:column;
+  overflow:hidden;
 }
 .loadscreen.hidden{ display:none; }
+.splash-img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+/* ---------- How-to-play modal ---------- */
+.modal-backdrop{
+  position:absolute; inset:0; z-index:25;
+  background:rgba(6,4,3,0.82);
+  display:flex; align-items:center; justify-content:center;
+  padding:24px;
+}
+.modal-backdrop.hidden{ display:none; }
+.modal-card{
+  position:relative; max-width:400px; max-height:88%; overflow-y:auto;
+  background:rgba(18,13,9,0.97); border:1px solid rgba(212,175,55,0.45);
+  border-radius:10px; padding:30px 22px 24px; text-align:center;
+  box-shadow:0 20px 50px rgba(0,0,0,0.6);
+}
+.modal-close{
+  position:absolute; top:8px; right:8px; width:30px; height:30px;
+  background:rgba(212,175,55,0.12); border:1px solid rgba(212,175,55,0.4);
+  border-radius:50%; color:var(--gold-bright); font-size:20px; line-height:1;
+  cursor:pointer;
+}
+.intro-body p{ font-size:14px; line-height:1.65; color:var(--parchment); margin:0 0 16px; text-align:left; }
+.intro-diff{ text-align:left; margin-bottom:22px; }
+.intro-diff-item{ font-size:13px; line-height:1.6; color:var(--parchment); margin-bottom:10px; }
+.intro-diff-item b{ color:var(--gold-bright); font-family:'Cinzel',serif; letter-spacing:1px; }
 
 /* ---------- Settings row (sound toggle) ---------- */
 .settings-row{ display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:10px 16px; margin-bottom:6px; }
