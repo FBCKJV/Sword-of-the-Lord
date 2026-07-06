@@ -2,7 +2,8 @@ const KEYS = {
   sound: 'sotl_sound_enabled',
   music: 'sotl_music_enabled',
   best: 'sotl_best',
-  difficulty: 'sotl_difficulty'
+  difficulty: 'sotl_difficulty',
+  seenIntro: 'sotl_seen_intro'
 };
 
 function readBool(key, fallback){
@@ -38,3 +39,6 @@ export function saveBest(val){
 export function saveDifficulty(key){
   try { localStorage.setItem(KEYS.difficulty, key); } catch(e){}
 }
+
+export function hasSeenIntro(){ return readBool(KEYS.seenIntro, false); }
+export function saveSeenIntro(){ writeBool(KEYS.seenIntro, true); }

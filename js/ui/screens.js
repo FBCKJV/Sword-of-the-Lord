@@ -4,7 +4,7 @@ import { ensurePlan, drawVerse, drawBossVerse } from '../core/round-plan.js';
 import { IMAGES } from '../data/images.js';
 import { DEMONS } from '../data/demons.js';
 import { DIFFICULTIES, getDifficulty } from '../data/difficulty.js';
-import { saveBest, saveSoundEnabled, saveMusicEnabled, saveDifficulty } from './settings.js';
+import { saveBest, saveSoundEnabled, saveMusicEnabled, saveDifficulty, saveSeenIntro } from './settings.js';
 import { recordLevelComplete, recordBestScore, queueBadgeToasts, renderBadgesGrid } from './badges.js';
 import { recordVersePlay, isMastered, masteredCount } from './mastery.js';
 import { playLevelComplete, playGameOver, playBossVictory, unlockAudio } from './sound.js';
@@ -450,6 +450,14 @@ export function initSettingsUI(){
   renderDifficultyUI();
 }
 
+export function showIntroModal(){
+  if(dom.introModal) dom.introModal.classList.remove('hidden');
+}
+function hideIntroModal(){
+  if(dom.introModal) dom.introModal.classList.add('hidden');
+  saveSeenIntro();
+}
+
 dom.pauseBtn.addEventListener('click', ()=>togglePause());
 dom.resumeBtn.addEventListener('click', ()=>togglePause(false));
 dom.quitBtn.addEventListener('click', quitToMenu);
@@ -459,6 +467,9 @@ dom.continueBtn.addEventListener('click', resumeRun);
 if(dom.leaderboardBtn) dom.leaderboardBtn.addEventListener('click', withLeaderboardLoading(dom.leaderboardBtn, showLeaderboard));
 if(dom.leaderboardBtnEnd) dom.leaderboardBtnEnd.addEventListener('click', withLeaderboardLoading(dom.leaderboardBtnEnd, showLeaderboard));
 if(dom.leaderboardBackBtn) dom.leaderboardBackBtn.addEventListener('click', hideLeaderboard);
+if(dom.howToPlayBtn) dom.howToPlayBtn.addEventListener('click', showIntroModal);
+if(dom.introCloseBtn) dom.introCloseBtn.addEventListener('click', hideIntroModal);
+if(dom.introOkBtn) dom.introOkBtn.addEventListener('click', hideIntroModal);
 if(dom.initialsSubmitBtn) dom.initialsSubmitBtn.addEventListener('click', withLeaderboardLoading(dom.initialsSubmitBtn, submitInitialsAndShowBoard));
 
 window.addEventListener('keydown', (e)=>{
