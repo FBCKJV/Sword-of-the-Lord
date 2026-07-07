@@ -25,6 +25,10 @@ export function isMastered(ref){
   return !!(mastery[ref] && mastery[ref].masteries > 0);
 }
 
+export function getVerseStats(ref){
+  return mastery[ref] || null;
+}
+
 export function masteredCount(){
   return Object.values(mastery).filter(m => m.masteries > 0).length;
 }

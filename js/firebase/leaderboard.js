@@ -66,16 +66,27 @@ export async function submitScore(initials, score, difficulty){
   }
 }
 
+// Whether the most recent fetchTopScores fell back to this device's local
+// board — the UI shows an "offline" note so a solo list isn't mistaken for
+// the real shared standings.
+let lastFetchLocal = false;
+export function wasLastFetchLocal(){ return lastFetchLocal; }
+
 export async function fetchTopScores(difficulty){
   const fb = await getFirestore_();
-  if(!fb) return getLocalBoard(difficulty).slice(0, MAX_ENTRIES);
+  if(!fb){
+    lastFetchLocal = true;
+    return getLocalBoard(difficulty).slice(0, MAX_ENTRIES);
+  }
   try {
     const { collection, query, orderBy, limit, getDocs } = fb.mod;
     const q = query(collection(fb.db, collectionFor(difficulty)), orderBy('score', 'desc'), limit(MAX_ENTRIES));
     const snap = await getDocs(q);
+    lastFetchLocal = false;
     return snap.docs.map(d => d.data());
   } catch(e){
     console.warn('[leaderboard] fetch failed, showing local board instead.', e);
+    lastFetchLocal = true;
     return getLocalBoard(difficulty).slice(0, MAX_ENTRIES);
   }
 }

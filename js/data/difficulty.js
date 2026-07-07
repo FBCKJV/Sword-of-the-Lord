@@ -23,7 +23,8 @@ export const DIFFICULTIES = {
     hintMode: 'fadeQuick',
     hintFadeSeconds: 5,
     camouflage: false,      // verse words keep their gold highlight vs. chaff
-    scoreMult: 0.8
+    scoreMult: 0.8,
+    blurb: 'The verse lingers on screen a few seconds after the fight starts before fading away.'
   },
   standard: {
     key: 'standard',
@@ -40,7 +41,8 @@ export const DIFFICULTIES = {
     selahChance: 0.22,
     hintMode: 'off',
     camouflage: false,
-    scoreMult: 1.0
+    scoreMult: 1.0,
+    blurb: 'No on-screen hint once the battle begins — you strike from memory.'
   },
   valiant: {
     key: 'valiant',
@@ -57,7 +59,8 @@ export const DIFFICULTIES = {
     selahChance: 0.12,
     hintMode: 'off',
     camouflage: true,       // no gold tell — verse words and chaff render identically
-    scoreMult: 1.3
+    scoreMult: 1.3,
+    blurb: 'No hint, and no gold tell marking the true words from the chaff — every word looks the same.'
   }
 };
 

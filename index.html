@@ -67,6 +67,7 @@
     <button class="playbtn" id="startBtn">Draw the Sword</button>
     <div class="controls-hint">tap the correct word as it falls · avoid the grey chaff</div>
     <button class="badges-link" id="leaderboardBtn">View Leaderboard</button>
+    <button class="badges-link" id="verseBookBtn">Verse Book</button>
     <button class="badges-link" id="howToPlayBtn">How to Play</button>
   </div>
 
@@ -76,12 +77,8 @@
       <div class="eyebrow">How To Play</div>
       <h1 style="font-size:26px;">Take Up The Sword</h1>
       <div class="intro-body">
-        <p>Each level shows you a verse to study. When the battle begins, its words fall from above — tap them in order, first to last, before the devil's grey chaff leads your blade astray. Miss a word or strike the wrong one and you'll lose a Shield of Faith; lose them all and the fight ends.</p>
-        <div class="intro-diff">
-          <div class="intro-diff-item"><b>Easy</b> — a gentle drill. The verse lingers on screen a few seconds after the fight starts before fading away.</div>
-          <div class="intro-diff-item"><b>Standard</b> — the good fight. No on-screen hint once the battle begins — you strike from memory.</div>
-          <div class="intro-diff-item"><b>Valiant</b> — quit you like men. No hint, and no gold tell marking the true words from the chaff — every word looks the same.</div>
-        </div>
+        <p>Each level shows you a verse to study. When the battle begins, its words fall from above — tap them in order, first to last, before the devil's grey chaff leads your blade astray. Miss a word or strike the wrong one and you'll lose a Shield of Faith; lose them all and the fight ends. Fight through all five rounds and cast down Satan's final verse to win the game.</p>
+        <div class="intro-diff" id="introDiffList"></div>
       </div>
       <button class="playbtn" id="introOkBtn">Amen</button>
     </div>
@@ -124,7 +121,7 @@
 
   <div class="overlay hidden" id="endScreen">
     <div class="eyebrow" id="endEyebrow">Shield Broken</div>
-    <div class="score-line">Fell at</div>
+    <div class="score-line" id="endFellLine">Fell at</div>
     <div class="level-ref" id="endRef" style="margin-bottom:16px;"></div>
     <div class="score-big" id="finalScore">0</div>
     <div class="best" id="bestLine">Best score: 0</div>
@@ -167,6 +164,13 @@
     <div class="lb-tabs" id="leaderboardTabs"></div>
     <ol class="leaderboard-list" id="leaderboardList"></ol>
     <button class="playbtn" id="leaderboardBackBtn">Back</button>
+  </div>
+
+  <div class="overlay hidden" id="verseBookScreen">
+    <div class="eyebrow">Thy Word Have I Hid</div>
+    <h1 style="font-size:32px;">Verse Book</h1>
+    <ul class="verse-book-list" id="verseBookList"></ul>
+    <button class="playbtn" id="verseBookBackBtn">Back</button>
   </div>
 </div>
 <script type="module" src="js/main.js"></script>

@@ -33,11 +33,17 @@ export const BADGES = [
     check: s => s.versesMastered >= 3 },
   { id:'hidden-word', name:'Hidden Word', icon:'hidden-word.svg',
     desc:'"Thy word have I hid in mine heart" — master ten verses.',
-    check: s => s.versesMastered >= 10 }
+    check: s => s.versesMastered >= 10 },
+  { id:'faithful', name:'Faithful', icon:'faithful.svg',
+    desc:'Finish the course — beat all five rounds.',
+    check: s => s.gamesCompleted >= 1 },
+  { id:'crown-of-life', name:'Crown of Life', icon:'crown-of-life.svg',
+    desc:'Beat the game on Valiant.',
+    check: s => s.valiantCompletions >= 1 }
 ];
 
 function defaultStats(){
-  return { correctHits:0, levelsCompleted:0, bossesDefeated:0, perfectVerses:0, noHintCompletions:0, bestScore:0, versesMastered:0 };
+  return { correctHits:0, levelsCompleted:0, bossesDefeated:0, perfectVerses:0, noHintCompletions:0, bestScore:0, versesMastered:0, gamesCompleted:0, valiantCompletions:0 };
 }
 
 export function loadStats(){
@@ -88,6 +94,13 @@ export function recordLevelComplete({ isBoss, perfect, hintOff, versesMastered }
   if(perfect) stats.perfectVerses++;
   if(hintOff) stats.noHintCompletions++;
   if(typeof versesMastered === 'number') stats.versesMastered = versesMastered;
+  saveStats(stats);
+  return evaluate();
+}
+
+export function recordGameComplete(difficulty){
+  stats.gamesCompleted++;
+  if(difficulty === 'valiant') stats.valiantCompletions++;
   saveStats(stats);
   return evaluate();
 }

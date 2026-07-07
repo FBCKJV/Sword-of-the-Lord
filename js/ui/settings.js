@@ -3,7 +3,8 @@ const KEYS = {
   music: 'sotl_music_enabled',
   best: 'sotl_best',
   difficulty: 'sotl_difficulty',
-  seenIntro: 'sotl_seen_intro'
+  seenIntro: 'sotl_seen_intro',
+  run: 'sotl_run'
 };
 
 function readBool(key, fallback){
@@ -42,3 +43,23 @@ export function saveDifficulty(key){
 
 export function hasSeenIntro(){ return readBool(KEYS.seenIntro, false); }
 export function saveSeenIntro(){ writeBool(KEYS.seenIntro, true); }
+
+// Run checkpoint: enough to resume at the start of the level the player was
+// on, even after the OS kills the tab. Written at every level start,
+// cleared on death or victory.
+export function saveRun(run){
+  try { localStorage.setItem(KEYS.run, JSON.stringify(run)); } catch(e){}
+}
+export function loadRun(){
+  try {
+    const run = JSON.parse(localStorage.getItem(KEYS.run));
+    // Sanity-check the shape so a corrupt blob can't wedge the Continue path.
+    if(run && typeof run.levelIdx === 'number' && Array.isArray(run.levelPlan) && run.levelPlan.length > run.levelIdx){
+      return run;
+    }
+    return null;
+  } catch(e){ return null; }
+}
+export function clearRun(){
+  try { localStorage.removeItem(KEYS.run); } catch(e){}
+}

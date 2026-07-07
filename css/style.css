@@ -309,6 +309,26 @@ button.playbtn:active{ transform:translateY(4px); box-shadow:0 2px 0 #6e1c11, 0 
 .leaderboard-list li .pts{ color:var(--gold-bright); font-weight:700; }
 .leaderboard-note{ font-size:11px; color:var(--parchment-dim); margin-bottom:10px; }
 
+/* ---------- Verse book ---------- */
+.verse-book-list{
+  list-style:none; padding:0; margin:0 0 16px; width:100%; max-width:320px; font-size:13px;
+  max-height:52vh; overflow-y:auto; -webkit-overflow-scrolling:touch;
+}
+.verse-book-list li{
+  display:flex; justify-content:space-between; align-items:center; gap:8px;
+  padding:5px 10px; border-bottom:1px solid rgba(212,175,55,0.12);
+}
+.verse-book-list .vb-section{
+  font-family:'Cinzel',serif; font-size:10px; letter-spacing:3px; text-transform:uppercase;
+  color:var(--gold); padding:12px 10px 4px; text-align:left;
+}
+.verse-book-list .vb-ref{ color:var(--parchment); text-align:left; }
+.vb-status{ font-size:11px; white-space:nowrap; }
+.vb-mastered{ color:var(--gold-bright); }
+.vb-perfect{ color:#c8d3d9; }
+.vb-played{ color:var(--parchment-dim); font-style:italic; }
+.vb-unseen{ color:rgba(140,127,97,0.5); }
+
 /* ---------- PWA update banner ---------- */
 .update-banner{
   position:absolute; left:50%; bottom:2%; transform:translateX(-50%) translateY(120%);

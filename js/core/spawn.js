@@ -74,10 +74,10 @@ function pickDecoyText(){
   return pool[Math.floor(Math.random()*pool.length)];
 }
 
-export function spawnDecoy(){
+export function spawnDecoy(speedMult){
   const text = pickDecoyText();
   const w = tileWidth(text);
-  state.decoys.push({ x: pickClearX(w), y: -30, w, h: 34, text, dead: false });
+  state.decoys.push({ x: pickClearX(w), y: -30, w, h: 34, text, dead: false, speedMult: speedMult || 1 });
 }
 
 export function spawnPowerup(kind){

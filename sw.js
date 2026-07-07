@@ -2,7 +2,7 @@
 // fetch fresh files instead of serving the previous cache. Same pattern as
 // the Hymns app: one version string, cache name derived from it, old caches
 // swept on activate.
-const VERSION = 'v11';
+const VERSION = 'v12';
 const CACHE_NAME = `sword-of-the-lord-${VERSION}`;
 
 const PRECACHE_URLS = [
@@ -56,7 +56,9 @@ const PRECACHE_URLS = [
   './assets/badges/overcomer.svg',
   './assets/badges/steadfast.svg',
   './assets/badges/scribe.svg',
-  './assets/badges/hidden-word.svg'
+  './assets/badges/hidden-word.svg',
+  './assets/badges/faithful.svg',
+  './assets/badges/crown-of-life.svg'
 ];
 
 self.addEventListener('install', event => {
