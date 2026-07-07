@@ -180,6 +180,21 @@ button.playbtn:active{ transform:translateY(4px); box-shadow:0 2px 0 #6e1c11, 0 
 }
 .loadscreen.hidden{ display:none; }
 .splash-img{ width:100%; height:100%; object-fit:cover; display:block; }
+.splash-loading{
+  position:absolute; left:0; right:0; top:5%; z-index:1;
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+}
+.splash-spinner{
+  width:26px; height:26px; border-radius:50%;
+  border:3px solid rgba(212,175,55,0.25); border-top-color:var(--gold-bright);
+  animation:splashSpin 0.9s linear infinite;
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,0.7));
+}
+@keyframes splashSpin{ to{ transform:rotate(360deg); } }
+.splash-loading-text{
+  font-family:'Cinzel',serif; font-size:11px; letter-spacing:4px; text-transform:uppercase;
+  color:var(--gold-bright); text-shadow:0 2px 10px rgba(0,0,0,0.85);
+}
 
 /* ---------- How-to-play modal ---------- */
 .modal-backdrop{
