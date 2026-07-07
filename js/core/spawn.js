@@ -44,6 +44,11 @@ export function spawnVerseWord(wordIdx){
 // Decoy text: plain chaff normally; on tricky tiers (or an enraged boss),
 // half the decoys are real words from the current verse pulled out of order —
 // so the player has to track *position*, not just recognize vocabulary.
+//
+// Punctuation-insensitive compare: the verse word may be "Verily," while the
+// chaff list has "verily" — those must count as the same word.
+function norm(w){ return w.toLowerCase().replace(/[^a-z']/g, ''); }
+
 function pickDecoyText(){
   const diff = getDifficulty(state.difficulty);
   const tier = state.currentEntry && state.currentEntry.type === 'boss'
@@ -51,16 +56,22 @@ function pickDecoyText(){
   const tricky = state.bossPhase2 || tier >= diff.trickyDecoyTier ||
     (state.currentEntry && state.currentEntry.type === 'boss' && state.difficulty !== 'easy');
 
+  // Words the player must NOT confuse with the imminent targets: no decoy of
+  // any kind may match the next few upcoming words. Several verses contain
+  // chaff-list words ("Verily, verily" — John 5:24; "therefore" — James 4:7),
+  // and a decoy that reads identically to the word the player owes is a
+  // shield lost through no fault of their own.
+  const upcoming = new Set(
+    state.words.slice(state.targetIdx, state.targetIdx + 4).map(norm)
+  );
+
   if(tricky && Math.random() < 0.5){
-    // Words the player must NOT confuse with the imminent targets: exclude
-    // anything matching the next few upcoming words.
-    const upcoming = new Set(
-      state.words.slice(state.targetIdx, state.targetIdx + 4).map(w => w.toLowerCase())
-    );
-    const pool = state.words.filter(w => !upcoming.has(w.toLowerCase()));
+    const pool = state.words.filter(w => !upcoming.has(norm(w)));
     if(pool.length) return pool[Math.floor(Math.random()*pool.length)];
   }
-  return CHAFF[Math.floor(Math.random()*CHAFF.length)];
+  const safeChaff = CHAFF.filter(c => !upcoming.has(norm(c)));
+  const pool = safeChaff.length ? safeChaff : CHAFF;
+  return pool[Math.floor(Math.random()*pool.length)];
 }
 
 export function spawnDecoy(){
