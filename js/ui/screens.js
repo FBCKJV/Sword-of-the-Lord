@@ -201,7 +201,13 @@ export function beginLevel(){
   state.fallSpeed = p.fallSpeed * diff.speedMult;
   state.decoyInterval = p.decoyInterval;
   state.nextChainIn = 0.4;
-  state.nextDecoyIn = state.decoyInterval * (0.6 + Math.random()*0.6);
+  // First couple of words used to fall with zero chaff anywhere near them
+  // (this used a longer, un-rate-adjusted delay than the steady-state loop
+  // in update.js), making the true opening words free to identify on sight —
+  // especially in Valiant, where there's no gold tell to begin with. Getting
+  // the first decoy in fast, in line with the same rate the rest of the
+  // battle uses, means the verse's actual first words aren't a freebie.
+  state.nextDecoyIn = (state.decoyInterval / diff.decoyRateMult) * (0.15 + Math.random()*0.35);
   state.devil.dying = 0;
 
   // Demon offense + mercy rolls for this verse
