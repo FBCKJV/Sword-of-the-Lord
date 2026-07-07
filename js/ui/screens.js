@@ -1,6 +1,7 @@
 import { state } from '../core/state.js';
 import { dom, initialsInputs } from '../core/dom.js';
 import { ensurePlan, drawVerse, drawBossVerse } from '../core/round-plan.js';
+import { spawnDecoy } from '../core/spawn.js';
 import { IMAGES } from '../data/images.js';
 import { DEMONS } from '../data/demons.js';
 import { DIFFICULTIES, getDifficulty } from '../data/difficulty.js';
@@ -201,7 +202,17 @@ export function beginLevel(){
   state.fallSpeed = p.fallSpeed * diff.speedMult;
   state.decoyInterval = p.decoyInterval;
   state.nextChainIn = 0.4;
-  state.nextDecoyIn = state.decoyInterval * (0.6 + Math.random()*0.6);
+  // First couple of words used to fall with zero chaff anywhere near them
+  // (this used a longer, un-rate-adjusted delay than the steady-state loop
+  // in update.js), making the true opening words free to identify on sight —
+  // especially in Valiant, where there's no gold tell to begin with. Getting
+  // the first decoy in fast, in line with the same rate the rest of the
+  // battle uses, means the verse's actual first words aren't a freebie.
+  state.nextDecoyIn = (state.decoyInterval / diff.decoyRateMult) * (0.15 + Math.random()*0.35);
+  // However fast that first decoy timer runs, the battle still opens on a
+  // completely bare screen for a beat — seed a couple of decoys already in
+  // flight so there's chaff on screen from frame one, not just "soon after."
+  for(let i = 0; i < (state.difficulty === 'easy' ? 1 : 2); i++) spawnDecoy();
   state.devil.dying = 0;
 
   // Demon offense + mercy rolls for this verse

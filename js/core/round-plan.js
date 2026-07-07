@@ -11,19 +11,25 @@ export function shuffle(arr){
   return a;
 }
 
-// Session decks: no immediate repeats, reshuffle on empty.
+// Session decks: no immediate repeats, reshuffle on empty. Tier 4 is where
+// every demon ends up capped from round 3 onward, so it's the pool players
+// actually cycle through for the rest of a long run — folding tier 3 in
+// alongside it roughly doubles that long-term variety instead of the same
+// 11 verses on repeat forever.
 export function drawVerse(tier){
   tier = Math.max(1, Math.min(4, tier));
+  const pool = tier === 4 ? [...VERSE_TIERS[3], ...VERSE_TIERS[4]] : VERSE_TIERS[tier];
   if(!state.tierDecks[tier] || state.tierDecks[tier].length === 0){
-    state.tierDecks[tier] = shuffle(VERSE_TIERS[tier]);
+    state.tierDecks[tier] = shuffle(pool);
   }
   return state.tierDecks[tier].pop();
 }
 
 export function drawBossVerse(roundIdx){
   const tier = Math.max(1, Math.min(4, roundIdx + 1));
+  const pool = tier === 4 ? [...BOSS_VERSE_TIERS[3], ...BOSS_VERSE_TIERS[4]] : BOSS_VERSE_TIERS[tier];
   if(!state.bossTierDecks[tier] || state.bossTierDecks[tier].length === 0){
-    state.bossTierDecks[tier] = shuffle(BOSS_VERSE_TIERS[tier]);
+    state.bossTierDecks[tier] = shuffle(pool);
   }
   return state.bossTierDecks[tier].pop();
 }
