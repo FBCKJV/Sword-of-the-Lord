@@ -136,8 +136,9 @@ export function roundRect(x,y,w,h,r){
 export function drawTile(tile, isDecoy){
   // Valiant strips the gold "this one's real" tell entirely — verse words
   // and chaff render identically, so the only way through is actually
-  // reading them in order, not pattern-matching a border color.
-  const camouflage = getDifficulty(state.difficulty).camouflage;
+  // reading them in order, not pattern-matching a border color. The Shadow
+  // Dervish's veil does the same thing to every mode, for a few seconds.
+  const camouflage = getDifficulty(state.difficulty).camouflage || state.shadowVeil > 0;
   ctx.save();
   ctx.translate(tile.x, tile.y);
   ctx.fillStyle = 'rgba(12,9,8,0.85)';

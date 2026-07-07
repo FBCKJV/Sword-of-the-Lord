@@ -34,6 +34,8 @@ export const state = {
   pendingCast: null,    // which attack fires when the telegraph ends
   fog: null,            // {x, w, alpha, vx, timer} drifting band that hides tiles
   bossPhase2: false,    // Satan enrage state (triggered at half verse)
+  prowlTimer: 0,        // Hellhound signature: everything falls faster while > 0
+  shadowVeil: 0,        // Shadow Dervish signature: tiles lose color tells while > 0
 
   sword: { swingTimer:0 },
   slashFx: { active:false, t:0, dur:0.3, dir:1, y:H-160 },
@@ -45,17 +47,18 @@ export const state = {
   soundEnabled: true,
   stripVisible: false,  // whether the hint strip is actually showing right now
   difficulty: 'standard',
+  runDifficulty: 'standard', // locked at Draw the Sword — the picker can't retag a live run
   paused: false,
   combo: 0,
   comboFlash: 0,        // milestone pulse timer for the combo meter
   hasActiveRun: false,
   pendingVictoryContinue: false,
+  pendingRestore: null, // run checkpoint loaded from storage, consumed by Continue
   levelPerfect: true,
   graceShield: false,   // one-hit shield earned by a perfect verse
   mercySpawnedThisVerse: false,
   selahSpawnedThisVerse: false,
   best: 0,
-  tierDecks: {},
-  bossTierDecks: {},
+  usedVerseRefs: new Set(),
   levelPlan: []
 };

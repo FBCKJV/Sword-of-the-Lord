@@ -2,7 +2,7 @@ import { state } from './core/state.js';
 import { dom } from './core/dom.js';
 import { drawBackground, drawSwordAndArm } from './core/draw.js';
 import { loadImages } from './data/images.js';
-import { loadSettings, hasSeenIntro } from './ui/settings.js';
+import { loadSettings, hasSeenIntro, loadRun } from './ui/settings.js';
 import { initSettingsUI, setLoopFn, showIntroModal } from './ui/screens.js';
 import { renderBadgesGrid } from './ui/badges.js';
 import { unlockAudio } from './ui/sound.js';
@@ -15,6 +15,14 @@ state.soundEnabled = settings.soundEnabled;
 state.musicEnabled = settings.musicEnabled;
 state.best = settings.best;
 state.difficulty = settings.difficulty;
+
+// A run checkpoint saved before the tab was killed: surface Continue on the
+// start screen; resumeRun() rebuilds the run from it on tap.
+const savedRun = loadRun();
+if(savedRun){
+  state.pendingRestore = savedRun;
+  state.hasActiveRun = true;
+}
 
 setLoopFn(loop);
 initSettingsUI();
@@ -37,6 +45,7 @@ Promise.all([
   new Promise(resolve => setTimeout(resolve, SPLASH_MS))
 ]).then(()=>{
   dom.loadScreen.classList.add('hidden');
+  dom.continueBtn.classList.toggle('hidden', !state.hasActiveRun);
   dom.startScreen.classList.remove('hidden');
   if(!hasSeenIntro()) showIntroModal();
 });
@@ -68,6 +77,14 @@ if('serviceWorker' in navigator){
             dom.updateBanner.classList.add('show');
           }
         });
+      });
+
+      // Home-screen PWAs sit resident for days without a full page load, so
+      // the passive once-per-navigation update check never fires — which is
+      // how testers ended up stuck on old versions. Re-check every time the
+      // app comes back to the foreground.
+      document.addEventListener('visibilitychange', ()=>{
+        if(document.visibilityState === 'visible') reg.update().catch(()=>{});
       });
     }).catch(err=>{
       console.warn('[sword-of-the-lord] Service worker registration failed:', err);

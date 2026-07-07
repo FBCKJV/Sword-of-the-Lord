@@ -1,16 +1,17 @@
 import { state } from '../core/state.js';
 import { dom, initialsInputs } from '../core/dom.js';
-import { ensurePlan, drawVerse, drawBossVerse } from '../core/round-plan.js';
+import { ensurePlan, TOTAL_ROUNDS, LEVELS_PER_ROUND } from '../core/round-plan.js';
 import { spawnDecoy } from '../core/spawn.js';
 import { IMAGES } from '../data/images.js';
-import { DEMONS } from '../data/demons.js';
 import { DIFFICULTIES, getDifficulty } from '../data/difficulty.js';
-import { saveBest, saveSoundEnabled, saveMusicEnabled, saveDifficulty, saveSeenIntro } from './settings.js';
-import { recordLevelComplete, recordBestScore, queueBadgeToasts, renderBadgesGrid } from './badges.js';
-import { recordVersePlay, isMastered, masteredCount } from './mastery.js';
+import { VERSE_TIERS, BOSS_LADDER, VICTORY_VERSE } from '../data/verses.js';
+import { saveBest, saveSoundEnabled, saveMusicEnabled, saveDifficulty, saveSeenIntro,
+         saveRun, clearRun } from './settings.js';
+import { recordLevelComplete, recordBestScore, recordGameComplete, queueBadgeToasts, renderBadgesGrid } from './badges.js';
+import { recordVersePlay, isMastered, masteredCount, getVerseStats } from './mastery.js';
 import { playLevelComplete, playGameOver, playBossVictory, unlockAudio } from './sound.js';
 import { playMenuTheme, playBattleTheme, playBossTheme, setMusicEnabled } from './music.js';
-import { submitScore, fetchTopScores, qualifiesForBoard } from '../firebase/leaderboard.js';
+import { submitScore, fetchTopScores, qualifiesForBoard, wasLastFetchLocal } from '../firebase/leaderboard.js';
 
 // Set once by main.js (setLoopFn) instead of importing core/loop.js directly —
 // loop.js sits downstream of update.js/input.js, which both lead back here,
@@ -120,16 +121,40 @@ export function quitToMenu(){
 }
 
 export function resumeRun(){
+  // Checkpoint saved before the app was last closed: rebuild the run from
+  // storage and start at the top of the level the player was on.
+  if(state.pendingRestore){
+    const run = state.pendingRestore;
+    state.pendingRestore = null;
+    state.levelIdx = run.levelIdx;
+    state.score = run.score;
+    state.lives = run.lives;
+    state.graceShield = !!run.graceShield;
+    state.levelPlan = run.levelPlan;
+    state.usedVerseRefs = new Set(run.usedRefs || []);
+    state.runDifficulty = run.difficulty;
+    state.difficulty = run.difficulty;
+    state.hasActiveRun = true;
+    dom.scoreVal.textContent = Math.floor(state.score);
+    renderShields();
+    dom.startScreen.classList.add('hidden');
+    beginLevel();
+    return;
+  }
   // Quitting from the victory screen leaves the just-won battle behind —
   // resuming means moving on to the next round's study screen, not
   // re-entering the dead fight.
   if(state.pendingVictoryContinue){
     state.pendingVictoryContinue = false;
+    state.difficulty = state.runDifficulty;
     dom.startScreen.classList.add('hidden');
     state.levelIdx++;
     beginLevel();
     return;
   }
+  // A run keeps the difficulty it started with, whatever the menu picker
+  // was tapped to in the meantime — no retagging an Easy run as Valiant.
+  state.difficulty = state.runDifficulty;
   dom.startScreen.classList.add('hidden');
   dom.pauseBtn.classList.add('show');
   if(state.stripVisible) dom.verseStrip.classList.remove('hidden');
@@ -149,15 +174,31 @@ function syncMusicToEntry(){
 export function startGame(){
   unlockAudio();
   state.levelIdx = 0; state.score = 0; state.lives = 3;
-  state.tierDecks = {}; state.bossTierDecks = {}; state.levelPlan = [];
+  state.usedVerseRefs = new Set(); state.levelPlan = [];
   state.graceShield = false;
   state.hasActiveRun = true;
   state.pendingVictoryContinue = false;
+  state.pendingRestore = null;
+  state.runDifficulty = state.difficulty; // locked for the whole run
   dom.startScreen.classList.add('hidden');
   dom.endScreen.classList.add('hidden');
   dom.scoreVal.textContent = '0';
   renderShields();
   beginLevel();
+}
+
+// Written at the top of every level: if the OS kills the tab mid-run, the
+// player resumes here — this level, this score — instead of losing the run.
+function saveCheckpoint(levelIdx){
+  saveRun({
+    levelIdx,
+    score: Math.floor(state.score),
+    lives: state.lives,
+    graceShield: state.graceShield,
+    difficulty: state.runDifficulty,
+    levelPlan: state.levelPlan,
+    usedRefs: [...state.usedVerseRefs]
+  });
 }
 
 export function beginLevel(){
@@ -168,28 +209,31 @@ export function beginLevel(){
   state.fog = null; state.bossPhase2 = false;
   state.timeScale = 1; state.selahTimer = 0; state.hitStop = 0;
   state.castTelegraph = 0; state.pendingCast = null;
+  state.prowlTimer = 0; state.shadowVeil = 0;
   state.levelPerfect = true;
   state.stripEverVisible = false;
   clearTimeout(hintFadeTimer);
   state.bannerText = null; state.bannerSub = null; state.bannerTimer = 0;
   ensurePlan(state.levelIdx);
   state.currentEntry = state.levelPlan[state.levelIdx];
-  const roundIdx = Math.floor(state.levelIdx / (DEMONS.length+1));
+  state.currentVerse = state.currentEntry.verse;
+  saveCheckpoint(state.levelIdx);
+  const roundIdx = Math.floor(state.levelIdx / LEVELS_PER_ROUND);
 
   if(state.currentEntry.type === 'boss'){
-    state.currentVerse = drawBossVerse(roundIdx);
     state.devil.isBoss = true;
     state.devil.key = 'satan';
     state.devil.scale = 1.15 + roundIdx*0.08;
-    dom.levelEyebrow.innerHTML = '<span class="boss-tag">Final Boss — Round ' + (roundIdx+1) + '</span>';
+    const isFinal = roundIdx >= TOTAL_ROUNDS - 1;
+    dom.levelEyebrow.innerHTML = '<span class="boss-tag">' +
+      (isFinal ? 'The Last Battle' : 'Boss — Round ' + (roundIdx+1) + ' of ' + TOTAL_ROUNDS) + '</span>';
     dom.demonName.textContent = 'SATAN';
     dom.demonName.style.color = 'var(--hell-bright)';
   } else {
-    state.currentVerse = drawVerse(state.currentEntry.tier);
     state.devil.isBoss = false;
     state.devil.key = state.currentEntry.demonKey;
     state.devil.scale = 1 + roundIdx*0.06;
-    dom.levelEyebrow.textContent = 'Level ' + (state.levelIdx+1) + (roundIdx>0 ? ' · Round '+(roundIdx+1) : '');
+    dom.levelEyebrow.textContent = 'Level ' + (state.levelIdx+1) + ' · Round ' + (roundIdx+1) + ' of ' + TOTAL_ROUNDS;
     dom.demonName.textContent = state.currentEntry.demonName;
     dom.demonName.style.color = '';
   }
@@ -339,17 +383,29 @@ export function levelComplete(){
   startLoop();
 }
 
+function isFinalRound(){
+  return Math.floor(state.levelIdx / LEVELS_PER_ROUND) >= TOTAL_ROUNDS - 1;
+}
+
 function showVictoryScreen(){
-  const roundIdx = Math.floor(state.levelIdx / (DEMONS.length+1));
+  const roundIdx = Math.floor(state.levelIdx / LEVELS_PER_ROUND);
+  const final = isFinalRound();
+  dom.victoryEyebrow.textContent = final ? 'The Devil Is Vanquished' : 'The Accuser Falls';
   dom.victoryRef.textContent = state.currentVerse.ref;
   dom.victoryVerse.textContent = '"' + state.currentVerse.text + '"';
   dom.victoryScoreVal.textContent = Math.floor(state.score);
-  dom.victoryRoundLine.textContent = 'Round ' + (roundIdx + 1) + ' overcome';
+  dom.victoryRoundLine.textContent = final
+    ? 'All ' + TOTAL_ROUNDS + ' rounds overcome'
+    : 'Round ' + (roundIdx + 1) + ' of ' + TOTAL_ROUNDS + ' overcome';
+  dom.victoryContinueBtn.textContent = final ? 'Finish the Course' : 'Onward';
+  // The final victory has nowhere to quit out to — the run is over either way.
+  if(dom.victoryQuitBtn) dom.victoryQuitBtn.classList.toggle('hidden', final);
   dom.victoryScreen.classList.remove('hidden');
 }
 
 function continueAfterVictory(){
   dom.victoryScreen.classList.add('hidden');
+  if(isFinalRound()){ winGame(); return; }
   state.levelIdx++;
   beginLevel();
 }
@@ -360,6 +416,7 @@ dom.victoryContinueBtn.addEventListener('click', continueAfterVictory);
 // picks up by moving on to the next round, same as tapping Onward.
 function quitAfterVictory(){
   state.pendingVictoryContinue = true;
+  saveCheckpoint(state.levelIdx + 1); // checkpoint the round ahead, not the dead fight
   dom.victoryScreen.classList.add('hidden');
   dom.continueBtn.classList.remove('hidden');
   dom.startScreen.classList.remove('hidden');
@@ -368,11 +425,25 @@ function quitAfterVictory(){
 }
 if(dom.victoryQuitBtn) dom.victoryQuitBtn.addEventListener('click', quitAfterVictory);
 
-export async function endGame(){
+// The game is beaten: all five rounds, Satan's whole ladder walked. The
+// completion bonus keys off surviving shields so a clean run outranks a
+// bruised one, then the same initials/leaderboard flow as a death runs —
+// winning was previously the one way a great score could NOT reach the board.
+function winGame(){
+  const diff = getDifficulty(state.runDifficulty);
+  const bonus = Math.round((750 + state.lives*250 + (state.graceShield ? 100 : 0)) * diff.scoreMult);
+  state.score += bonus;
+  dom.scoreVal.textContent = Math.floor(state.score);
+  queueBadgeToasts(recordGameComplete(state.runDifficulty), dom);
+  endGame(true, bonus);
+}
+
+export async function endGame(won = false, bonus = 0){
   state.running = false; state.phase = 'gameover';
   state.hasActiveRun = false;
+  clearRun(); // the run is finished either way — nothing to resume
   if(state.raf) cancelAnimationFrame(state.raf);
-  playGameOver();
+  if(won) playBossVictory(); else playGameOver();
   playMenuTheme();
   if(state.score > state.best){
     state.best = state.score;
@@ -380,16 +451,24 @@ export async function endGame(){
   }
   queueBadgeToasts(recordBestScore(state.score), dom);
   dom.finalScoreEl.textContent = Math.floor(state.score);
-  dom.bestLineEl.textContent = 'Best score: ' + Math.floor(state.best);
-  dom.endRef.textContent = state.currentVerse.ref + ' — "' + state.currentVerse.text + '"';
-  dom.endEyebrow.textContent = 'Shield Broken';
+  dom.bestLineEl.textContent = 'Best score: ' + Math.floor(state.best)
+    + (won && bonus ? ' · completion bonus +' + bonus : '');
+  if(won){
+    dom.endEyebrow.textContent = 'The Good Fight Fought';
+    dom.endFellLine.textContent = 'The course is finished —';
+    dom.endRef.textContent = VICTORY_VERSE.ref + ' — "' + VICTORY_VERSE.text + '"';
+  } else {
+    dom.endEyebrow.textContent = 'Shield Broken';
+    dom.endFellLine.textContent = 'Fell at';
+    dom.endRef.textContent = state.currentVerse.ref + ' — "' + state.currentVerse.text + '"';
+  }
   dom.verseStrip.classList.add('hidden');
   dom.pauseBtn.classList.remove('show');
   dom.pauseScreen.classList.add('hidden');
   state.paused = false;
   dom.endScreen.classList.remove('hidden');
 
-  const top = await fetchTopScores(state.difficulty);
+  const top = await fetchTopScores(state.runDifficulty);
   const qualifies = qualifiesForBoard(Math.floor(state.score), top);
   if(dom.initialsPrompt) dom.initialsPrompt.classList.toggle('hidden', !qualifies);
 }
@@ -404,7 +483,9 @@ if(dom.endMenuBtn) dom.endMenuBtn.addEventListener('click', backToMenuFromEnd);
 
 export async function submitInitialsAndShowBoard(){
   const initials = initialsInputs().map(i => i.value || '-').join('');
-  await submitScore(initials, Math.floor(state.score), state.difficulty);
+  // Submit under the difficulty the run was PLAYED at — the menu picker may
+  // have been tapped since, and an Easy score must not land on Valiant's board.
+  await submitScore(initials, Math.floor(state.score), state.runDifficulty);
   if(dom.initialsPrompt) dom.initialsPrompt.classList.add('hidden');
   await showLeaderboard();
 }
@@ -442,6 +523,11 @@ function renderScoreList(top){
   dom.leaderboardList.innerHTML = top.length
     ? top.map((e,i)=>`<li><span class="rank">${i+1}.</span><span class="name">${e.initials}</span><span class="pts">${e.score}</span></li>`).join('')
     : '<li class="leaderboard-note">No scores yet — be the first!</li>';
+  // Silent local fallback looked identical to the shared board, which made
+  // "why can't I see anyone else's scores?" a recurring mystery during testing.
+  if(wasLastFetchLocal()){
+    dom.leaderboardList.innerHTML += '<li class="leaderboard-note">offline — showing scores from this device only</li>';
+  }
 }
 
 async function selectLeaderboardTab(difficulty){
@@ -531,6 +617,52 @@ function hideIntroModal(){
   saveSeenIntro();
 }
 
+// Difficulty descriptions in the how-to-play modal come from the same
+// object the game plays by, so tuning a mode can't silently outdate them.
+function renderIntroDifficulties(){
+  if(!dom.introDiffList) return;
+  dom.introDiffList.innerHTML = Object.values(DIFFICULTIES).map(d =>
+    `<div class="intro-diff-item"><b>${d.label}</b> — ${d.tagline}. ${d.blurb}</div>`
+  ).join('');
+}
+
+// ---------- Verse book: every verse in the game, with the player's own
+// record against it. This page is the point of the whole exercise.
+function verseStatus(ref){
+  if(isMastered(ref)) return '<span class="vb-status vb-mastered">✦ mastered</span>';
+  const s = getVerseStats(ref);
+  if(s && s.perfects > 0) return '<span class="vb-status vb-perfect">✓ perfect</span>';
+  if(s && s.plays > 0) return '<span class="vb-status vb-played">fought</span>';
+  return '<span class="vb-status vb-unseen">—</span>';
+}
+
+function renderVerseBook(){
+  if(!dom.verseBookList) return;
+  const sections = [];
+  const all = Object.values(VERSE_TIERS).flat()
+    .map(v => ({ ...v, wc: v.text.split(/\s+/).length }))
+    .sort((a,b) => a.wc - b.wc);
+  sections.push('<div class="vb-section">The Verses</div>');
+  all.forEach(v => {
+    sections.push(`<li><span class="vb-ref">${v.ref}</span>${verseStatus(v.ref)}</li>`);
+  });
+  sections.push('<div class="vb-section">Satan’s Ladder</div>');
+  BOSS_LADDER.forEach((v, i) => {
+    sections.push(`<li><span class="vb-ref">Round ${i+1} · ${v.ref}</span>${verseStatus(v.ref)}</li>`);
+  });
+  dom.verseBookList.innerHTML = sections.join('');
+}
+
+function showVerseBook(){
+  renderVerseBook();
+  dom.startScreen.classList.add('hidden');
+  dom.verseBookScreen.classList.remove('hidden');
+}
+function hideVerseBook(){
+  dom.verseBookScreen.classList.add('hidden');
+  dom.startScreen.classList.remove('hidden');
+}
+
 dom.pauseBtn.addEventListener('click', ()=>togglePause());
 dom.resumeBtn.addEventListener('click', ()=>togglePause(false));
 dom.quitBtn.addEventListener('click', quitToMenu);
@@ -543,6 +675,9 @@ if(dom.leaderboardBackBtn) dom.leaderboardBackBtn.addEventListener('click', hide
 if(dom.howToPlayBtn) dom.howToPlayBtn.addEventListener('click', showIntroModal);
 if(dom.introCloseBtn) dom.introCloseBtn.addEventListener('click', hideIntroModal);
 if(dom.introOkBtn) dom.introOkBtn.addEventListener('click', hideIntroModal);
+if(dom.verseBookBtn) dom.verseBookBtn.addEventListener('click', showVerseBook);
+if(dom.verseBookBackBtn) dom.verseBookBackBtn.addEventListener('click', hideVerseBook);
+renderIntroDifficulties();
 if(dom.initialsSubmitBtn) dom.initialsSubmitBtn.addEventListener('click', withLeaderboardLoading(dom.initialsSubmitBtn, submitInitialsAndShowBoard));
 
 window.addEventListener('keydown', (e)=>{

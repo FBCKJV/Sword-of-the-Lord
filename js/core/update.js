@@ -18,6 +18,12 @@ function updateBattle(dt){
   }
   const bdt = dt * s.timeScale;
 
+  // Signature timers: Hellhound prowl speeds the whole sky up briefly;
+  // the Dervish's veil hides color tells (checked by drawTile).
+  if(s.prowlTimer > 0) s.prowlTimer -= bdt;
+  if(s.shadowVeil > 0) s.shadowVeil -= bdt;
+  const prowl = s.prowlTimer > 0 ? 1.35 : 1;
+
   // --- Verse word chain: keep up to chainSize words cascading in order ---
   const nextToSpawn = s.targetIdx + s.verseTiles.length;
   if(s.verseTiles.length < diff.chainSize && nextToSpawn < s.words.length){
@@ -27,7 +33,7 @@ function updateBattle(dt){
       s.nextChainIn = diff.chainGap;
     }
   }
-  s.verseTiles.forEach(t => { t.y += s.fallSpeed * bdt; });
+  s.verseTiles.forEach(t => { t.y += s.fallSpeed * prowl * bdt; });
   if(s.verseTiles.length && s.verseTiles[0].y > H + 40){
     missedTile(s.verseTiles[0]);
   }
@@ -38,7 +44,7 @@ function updateBattle(dt){
     spawnDecoy();
     s.nextDecoyIn = (s.decoyInterval / diff.decoyRateMult) * (0.7 + Math.random()*0.6);
   }
-  s.decoys.forEach(d => { d.y += s.fallSpeed * 0.92 * bdt; });
+  s.decoys.forEach(d => { d.y += s.fallSpeed * 0.92 * prowl * (d.speedMult || 1) * bdt; });
   s.decoys = s.decoys.filter(d => d.y < H + 40 && !d.dead);
 
   // --- Mercy tiles (fall slower so they're catchable) ---
@@ -91,9 +97,19 @@ function updateDemonAttack(bdt, diff){
 
   s.demonAttackIn -= bdt;
   if(s.demonAttackIn <= 0){
-    const kinds = diff.demonAttackKinds;
+    let kind;
+    if(s.currentEntry && s.currentEntry.type === 'demon' && s.currentEntry.signature){
+      // Each demon's trademark move overrides the generic difficulty cast —
+      // this is what makes a Wraith fight feel different from a Hellhound's.
+      kind = s.currentEntry.signature;
+      // The veil hides the gold tell; Valiant already has none, so the
+      // Dervish reaches for fog there instead.
+      if(kind === 'veil' && diff.camouflage) kind = 'fog';
+    } else {
+      const kinds = diff.demonAttackKinds;
+      kind = kinds[Math.floor(Math.random()*kinds.length)];
+    }
     // Fog needs somewhere to matter — skip it on very short verses.
-    let kind = kinds[Math.floor(Math.random()*kinds.length)];
     if(kind === 'fog' && s.words.length < 6) kind = 'chaffBurst';
     s.pendingCast = kind;
     s.castTelegraph = 0.7; // wind-up: demon glows so the player can brace
@@ -116,6 +132,18 @@ function fireCast(kind){
   if(kind === 'chaffBurst'){
     spawnDecoy(); spawnDecoy();
     if(s.difficulty === 'valiant') spawnDecoy();
+  } else if(kind === 'pairs'){
+    // Bone Guard: the burst comes doubled.
+    spawnDecoy(); spawnDecoy(); spawnDecoy(); spawnDecoy();
+  } else if(kind === 'flurry'){
+    // Blade Fiend: fewer, but they cut down the screen fast.
+    spawnDecoy(1.3); spawnDecoy(1.3); spawnDecoy(1.3);
+  } else if(kind === 'prowl'){
+    s.prowlTimer = 3.5;
+    showBanner('THE HOUND PROWLS', 'all things fall faster', 1.4);
+  } else if(kind === 'veil'){
+    s.shadowVeil = 4;
+    showBanner('SHADOW VEIL', 'the gold light is hidden', 1.4);
   } else if(kind === 'fog'){
     const w = 200 + Math.random()*80;
     s.fog = {
@@ -123,7 +151,7 @@ function fireCast(kind){
       w,
       vx: (Math.random() < 0.5 ? 1 : -1) * (30 + Math.random()*20),
       alpha: 1,
-      timer: 6
+      timer: s.difficulty === 'easy' ? 4 : 6
     };
     if(s.fog.x < 0) s.fog.vx = Math.abs(s.fog.vx);
     else s.fog.vx = -Math.abs(s.fog.vx);
