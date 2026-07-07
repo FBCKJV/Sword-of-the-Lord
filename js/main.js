@@ -30,7 +30,7 @@ drawSwordAndArm();
 // Old-cartridge-style splash: hold the title screen for a fixed stretch
 // (running in parallel with real asset loading, whichever takes longer)
 // before revealing the main menu.
-const SPLASH_MS = 17000;
+const SPLASH_MS = 13000;
 
 Promise.all([
   loadImages(),

@@ -19,6 +19,10 @@
 
   <div class="loadscreen" id="loadScreen">
     <img class="splash-img" src="assets/backgrounds/splash.jpg" alt="Sword of the Lord — A KJV Bible Game">
+    <div class="splash-loading">
+      <div class="splash-spinner"></div>
+      <div class="splash-loading-text">Loading…</div>
+    </div>
   </div>
 
   <div class="hud">
@@ -136,6 +140,7 @@
     </div>
 
     <button class="playbtn" id="retryBtn">Take Up The Sword Again</button>
+    <button class="playbtn" id="endMenuBtn" style="margin-top:10px; background:transparent; border:1px solid rgba(212,175,55,0.4); box-shadow:none; color:var(--parchment-dim);">Back to Menu</button>
     <button class="badges-link" id="leaderboardBtnEnd">View Leaderboard</button>
   </div>
 
@@ -148,6 +153,7 @@
     <div class="score-big" id="victoryScoreVal">0</div>
     <div class="best" id="victoryRoundLine"></div>
     <button class="playbtn" id="victoryContinueBtn">Onward</button>
+    <button class="playbtn" id="victoryQuitBtn" style="margin-top:10px; background:transparent; border:1px solid rgba(212,175,55,0.4); box-shadow:none; color:var(--parchment-dim);">Quit to Menu</button>
   </div>
 
   <div class="update-banner" id="updateBanner">
@@ -158,6 +164,7 @@
   <div class="overlay hidden" id="leaderboardScreen">
     <div class="eyebrow">Arcade Board</div>
     <h1 style="font-size:32px;">Top Swordsmen</h1>
+    <div class="lb-tabs" id="leaderboardTabs"></div>
     <ol class="leaderboard-list" id="leaderboardList"></ol>
     <button class="playbtn" id="leaderboardBackBtn">Back</button>
   </div>
